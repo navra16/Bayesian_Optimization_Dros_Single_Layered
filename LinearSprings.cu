@@ -49,8 +49,8 @@ void ComputeLinearSprings(
             thrust::raw_pointer_cast(coordInfoVecs.scaling_per_edge.data()),
             linearSpringInfoVecs.spring_constant, 
             linearSpringInfoVecs.spring_constant_weak,
-            generalParams.Rmin,
-            //generalParams.Rmin_growth,
+            /* Instead of generalParams.Rmin, pass the pointer to edge rest lengths: */
+            thrust::raw_pointer_cast(linearSpringInfoVecs.edge_initial_length.data()),
             thrust::raw_pointer_cast(generalParams.edges_in_upperhem.data()),
             //thrust::raw_pointer_cast(generalParams.boundaries_in_upperhem.data()),
             thrust::raw_pointer_cast(coordInfoVecs.nodeLocX.data()),

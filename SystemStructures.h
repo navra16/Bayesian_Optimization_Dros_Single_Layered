@@ -154,6 +154,7 @@ struct HostSetInfoVecs {
 
     // Vector to store the initial length of edges.
     thrust::host_vector<double> edge_initial_length;
+    thrust::host_vector<double> edge_rest_length;
 };
 
 // Functor to add forces to nodes in the system.

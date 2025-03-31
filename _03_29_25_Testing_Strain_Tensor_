@@ -1,0 +1,302 @@
+Loading centos/7.9
+  Loading requirement: singularity-ce/3.9.3
+UID: readonly variable
+GID: readonly variable
+Loading GCC/4.9.3-2.25
+  Loading requirement: GCCcore/4.9.3 binutils/2.25-GCCcore-4.9.3
+3
+argc: 1
+arg: -dt=0.001
+pos: 3
+key: -dt
+val: 0.001
+setting timestep: 0.001
+data struct file name = Data_structure_circle_double_layer.xml
+Setting tau: 0
+Setting kbt: 1
+Setting linear const: 5
+Setting area const: 1.5
+Setting bending const: 2.5
+Setting lj eps: 5
+Setting lj rmin: 0.15
+Setting lj rmax: 3.90512
+Setting lj const: 1
+Setting lj x: 0
+Setting lj y: 0
+Setting lj z: 0
+Nodes parsed successfully.
+Edges parsed successfully.
+Elements parsed successfully.
+Element-to-edge mappings parsed successfully.
+Edge-to-element mappings parsed successfully.
+Initializing
+num nodes: 362
+num edges: 1022
+num elems: 661
+Copying
+fixed_node_in_host: 
+end_of_fixed_node_host_printout
+fixed_node_in_device: 
+end_of_fixed_node_device_printout
+size of host fixed 362
+size of device fixed 1448
+Mem
+Host_nodeLocX size = 1448
+Host_nodeForceX size = 1448
+Host_triangles2Nodes size = 2644
+Host_triangles2Edges size = 2644
+Host_edges2Nodes size = 4088
+Host_edges2Triangles size = 4088
+System Ready
+solving system in main
+current_edge_to_tip_height_scale = 2.14748e+09
+current_edge_to_tip_height_scale for edge-swap = 2.14748e+09
+bdry_to_tip_height_scale = 2.14748e+09
+Are we simulating a case where restiffening or the restoration (even just partially) of mechanical properties? 1 (bool) 
+restiff region linear = 0.5
+restiff region bend = 0.25
+restiff region area = 0.15
+If restiff value is higher than that of the weakened case, something is wrong
+relax max steps before growth and edgeswap = 3000*max_runTime
+Declaration of rbc and n_rbc complete.
+Utilities_ptr declaration complete.
+Max_cell_triangle_height = 0, min_cell_triangle_height = 0
+Cell height = 0
+Determination of max triangle and min cell height complete.
+min_num_edge_loop for edgeswap = 1
+MAX_GROWTH_NUMBER (# of edge to expand) per growth event = 1
+GROWTH_FREQ (how many times Max_Runtime has to be reached to perform growth) = 25
+GROWTH_FREQ2 (how many times Max_Runtime has to be reached to perform growth, for variable ES rate cases25
+Point of transition describes the ratio of the total time simulation time is reached for relaxation (edge-swap) frequency to change : 0.1
+Point of transition is also used to indicate if strain_threshold needs to change or not
+ENERGY_GRADIENT_THRESHOLD = 0.02
+SCALE TYPE = 3
+0:= sigmoidal Gaussian-like weakening, 1:= a1*(pow(x,b)) + a2*(1-pow(x,b)) type weakening, 2:= pure Gaussian weakening, 3:= isotropic, 4:= hill equation
+GROWTH: material insertion energy cost (dependent on local chemical concentration) = 5.99146
+GROWTH: critical strain threshold used for insertion probability calculation = 0.05, value loaded = 0.05
+GROWTH: critical strain threshold used for insertion probability calculation if changes are needed= 0.05
+GROWTH ENERGY SCALING FOR MATERIAL INSERTION PROBABILITY = 1
+NEIGHBOR SAFE GUARD THRESHOLD = 9
+dt = 1e-06
+Max runtime = 5e-05
+Max runstep = 50
+Sample size: 2
+Record frequency = 1
+recentering of the model cell frequency = 10
+Number of edge-swap per kBT value (or total number of edge-swap if kBT is fixed) = 50000
+GROWTH FREQ SCALE: decides how many growth event must be checked before recording the result = 4
+min kT for simulation termination = -0.1
+LINE TENSION THRESHOLD for activation of line tension = -10000
+VOLUME THRESHOLD for activation of weakened membrane = 0
+abs_Rmin = 0.001
+equilibrium triangular area = 1
+Morse_NM_D_att = 0
+Morse_NM_a_att = 0
+Morse_NM_D_rep = 0
+Morse_NM_a_rep = 0
+Morse_NN_D = 0
+Morse_NN_a = 0
+Membrane volume exclusion Morse D = 0.01
+Membrane volume exclusion Morse a = 9
+spring constant for surface normal expansion (pressure within the cell) = 0.2
+spring constant for the septin ring (before budding) = 0
+weakened region linear (before budding) = 1.25
+weakened region bend (before budding) = 2.5
+weakened region area (before budding) = 0.375
+equilibrium bending angle of the membrane = 0.0087
+equilibrium bending angle of the bud = 0.0087
+manual push speed for the nucleus tip = 0
+manual push speed for the remainder of the nucleus = 0
+boundaries in upperhem = 1022
+edges2Triangles_1 = 4088
+edges2Triangles_2 = 4088
+size of boundary_edge_list = 61
+size of boundary_node_list (double-counted) = 122
+INITIAL EDGES IN UPPERHEM = 0
+Initial volume = 6.95322e-310
+dtb = 1.99981
+initial distance between cell tip and the boundary of weakened area = 1.99981
+Notice that here, the distance from the tip to the boundary is slightly extended by half of the equilibrium length of an edge
+STARTING THE ACTUAL SIMULATION
+Time used for 'steady state' initial condition before growth and edge swaps = 0.15
+current total energy (before growth and edge swaps) = 331.534
+LINEAR ENERGY = 24.1774
+BEND ENERGY = 0.0381646
+AREA ENERGY = 307.318
+VOLUME ENERGY = inf
+true_current_total_volume (before growth and edge swaps) = 0.000502262
+current KBT = 1
+Initial bud surface area (before growth and edge swaps) = 0
+spring constant for surface normal expansion (pressure within the cell) = 0.2
+spring constant for the septin ring = 0
+equilibrium length of each segment of the septin ring = 0
+maxSpringScaler_linear (not 1.0 if we want max linear spring in the hill function scaling not equal to mother cell) = 1
+maxSpringScaler_area (not 1.0 if we want max area spring in the hill function scaling not equal to mother cell) = 1
+maxSpringScaler_bend (not 1.0 if we want max bend spring in the hill function scaling not equal to mother cell) = 1
+weakened region linear = 3.75
+weakened region bend = 0.3375
+weakened region area = 1.125
+true current total volume = 0.000502262
+eq total volume = 0.00100452
+equilibrium length of each segment of the septin ring = 0
+equilibrium length of the septin ring = 0
+linear energy from spring.cu: 24.1774
+Force from linear on node 36 = 0.116013 0.0451218 0.00211573
+LINETENSION
+linear energy from spring.cu: 24.1774
+Force from linear on node 36 = 0.116014 0.045122 0.00211446
+LINETENSION
+linear energy from spring.cu: 24.1774
+Force from linear on node 36 = 0.116014 0.0451222 0.0021132
+LINETENSION
+linear energy from spring.cu: 24.1774
+Force from linear on node 36 = 0.116015 0.0451223 0.00211195
+LINETENSION
+linear energy from spring.cu: 24.1774
+Force from linear on node 36 = 0.116015 0.0451225 0.0021107
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116016 0.0451227 0.00210946
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116016 0.0451229 0.00210823
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116017 0.0451231 0.00210701
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116017 0.0451232 0.00210579
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116018 0.0451234 0.00210458
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116019 0.0451236 0.00210338
+LINETENSION
+linear energy from spring.cu: 24.1773
+Force from linear on node 36 = 0.116019 0.0451238 0.00210218
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.11602 0.045124 0.00210099
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.11602 0.0451242 0.00209981
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116021 0.0451243 0.00209863
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116021 0.0451245 0.00209747
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116022 0.0451247 0.00209631
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116022 0.0451249 0.00209515
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116023 0.0451251 0.002094
+LINETENSION
+linear energy from spring.cu: 24.1772
+Force from linear on node 36 = 0.116023 0.0451252 0.00209286
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116024 0.0451254 0.00209173
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116024 0.0451256 0.0020906
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116025 0.0451258 0.00208948
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116025 0.045126 0.00208836
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116026 0.0451262 0.00208725
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116026 0.0451263 0.00208615
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116027 0.0451265 0.00208506
+LINETENSION
+linear energy from spring.cu: 24.1771
+Force from linear on node 36 = 0.116027 0.0451267 0.00208397
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116028 0.0451269 0.00208288
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116028 0.0451271 0.0020818
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116029 0.0451272 0.00208073
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.11603 0.0451274 0.00207967
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.11603 0.0451276 0.00207861
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116031 0.0451278 0.00207755
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116031 0.045128 0.0020765
+LINETENSION
+linear energy from spring.cu: 24.177
+Force from linear on node 36 = 0.116032 0.0451282 0.00207546
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116032 0.0451283 0.00207443
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116033 0.0451285 0.00207339
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116033 0.0451287 0.00207237
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116034 0.0451289 0.00207135
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116034 0.0451291 0.00207034
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116035 0.0451292 0.00206933
+LINETENSION
+linear energy from spring.cu: 24.1769
+Force from linear on node 36 = 0.116035 0.0451294 0.00206832
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116036 0.0451296 0.00206733
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116036 0.0451298 0.00206634
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116037 0.04513 0.00206535
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116037 0.0451302 0.00206437
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116038 0.0451303 0.00206339
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116038 0.0451305 0.00206242
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116039 0.0451307 0.00206146
+LINETENSION
+linear energy from spring.cu: 24.1768
+Force from linear on node 36 = 0.116039 0.0451309 0.0020605
+LINETENSION
+bdry_to_tip_height = 0.00124823
+
+
+
+terminate called after throwing an instance of 'thrust::system::system_error'
+  what():  __copy::trivial_device_copy H->D: failed: invalid argument
+bash: line 1: 2572687 Aborted                 (core dumped) ./virus-model -dt=0.001 Data_structure_circle_double_layer.xml

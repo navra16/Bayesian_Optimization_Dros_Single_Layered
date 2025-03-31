@@ -53,6 +53,9 @@ public:
 
     // Function to add an edge between two nodes with the specified IDs (idL and idR) and initial length (edge_initial_length).
     void addEdge(int idL, int idR, double edge_initial_length);
+    
+    // random function nav 03/25/25
+    //void ChangeLength(int idL, int idR, double edge_rest_length);
 
     // Function to add an element (triangle) to the system using three node IDs (idA, idB, and idC).
     void addElement(int idA, int idB, int idC);

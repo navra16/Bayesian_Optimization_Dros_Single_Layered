@@ -20,7 +20,7 @@
 #include <list>
 #include "TurgorForce.h"
 #include "LinearSpringsEnergy.h"
-
+#include "StrainTensor.h"
 
 //somehow the gradient is not being set in my version - Kevin
 
@@ -1089,7 +1089,7 @@ utilities_ptr->gradient_weakening_update_host_vecs(sigma,
 		coordInfoVecs.nodeLocY[max_height_index],
 		coordInfoVecs.nodeLocZ[max_height_index],
 		dtb,
-		dtb_max,
+		dtb_max, 
 		generalParams,
 		coordInfoVecs,
 		build_ptr->hostSetInfoVecs);
@@ -1236,17 +1236,17 @@ while (runSim == true){
     storage->print_VTK_File();
     
     // Initialize variables for the edge swap algorithm.
-		int edgeswap_iteration = 2;//0; nav changed this. Now it will try to edgeswap. 03/04/2025
-		num_edge_loop = 2;//0; nav changed this. 03/04/2025 // Number of edge loops used in the algorithm.
+		int edgeswap_iteration = 0; //nav changed this. Now it will try to edgeswap. 03/04/2025
+		num_edge_loop = 0;// nav changed this. 03/04/2025 // Number of edge loops used in the algorithm.
 
-		int LINE_TENSION_START = 0;
+		int LINE_TENSION_START = 3; // nav changed this from 0 to 3 on 03/29/2025
 		
 		bool WEAKENED_START = false; // nav is now changing this as well from false to true 8/26/24. Nav changed it back to false 8/26/24
 		bool EDGESWAP_ALGORITHM_TRIGGERED;
 		bool needToRebuildDiffStructAfterEdgeSwap = false;
 		int number_of_simulation_step = 0;
  		
-    std::cout<<"        IT GOT TILL HERE NAV"<<std::endl;
+    //std::cout<<"        IT GOT TILL HERE NAV"<<std::endl;
     // Main simulation loop.
     while (initial_kT > 0){
   			if (edgeswap_iteration >= NKBT){
@@ -1256,7 +1256,7 @@ while (runSim == true){
   			}
         
         
-    std::cout<<"        IT GOT TILL HERE NAV - 2"<<std::endl;
+  //  std::cout<<"        IT GOT TILL HERE NAV - 2"<<std::endl;
 			
       ////////////////////NOW RELAX THE ATTEMPTED EDGESWAP//////////////////////
 				
@@ -1264,7 +1264,7 @@ while (runSim == true){
 				translate_counter = 0;
 				double VOLUME_RATIO = generalParams.true_current_total_volume/generalParams.eq_total_volume;
 			
-    std::cout<<"        IT GOT TILL HERE NAV - 3"<<std::endl;
+   // std::cout<<"        IT GOT TILL HERE NAV - 3"<<std::endl;
 			  if (generalParams.true_current_total_volume/initial_volume >= LINE_TENSION_THRESHOLD && edgeswap_iteration == 0){
             // Calculate the equuilibrium length of the septin ring.
   					double DIST = 0.0;
@@ -1280,7 +1280,7 @@ while (runSim == true){
 						    }
 					  }
   					
-    std::cout<<"        IT GOT TILL HERE NAV - 4"<<std::endl;
+    //std::cout<<"        IT GOT TILL HERE NAV - 4"<<std::endl;
              // Calculate and set the equilibrium length of each segment of the septin ring.
             std::cout<<"equilibrium length of each segment of the septin ring = "<<generalParams.length_scale*generalParams.Rmin<<std::endl;
   					generalParams.eq_total_boundary_length = COUNT*generalParams.length_scale* generalParams.Rmin;
@@ -1682,26 +1682,26 @@ if (bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale) && isRes
 // Determine the number of edges for edge swapping.
 num_edge_loop = SAMPLE_SIZE; //round(true_num_edges_in_upperhem*SAMPLE_SIZE); Nav is commenting out because she does not want to edgeswap. REplacing with SAMPLE_SIZE 02-27-2025 //SAMPLE_SIZE;<nav commented out and replaced with this 10/26/24 >  // round(true_num_edges_in_upperhem*SAMPLE_SIZE);
 
-// Handle cases where the number of edges is less than min.
-if (num_edge_loop <= min_num_edge_loop){
-	num_edge_loop = min_num_edge_loop;// nav commented this out and replaced with 0; 02/27/25
-}
+// Handle cases where the number of edges is less than min. //nav commented out this whole thing because unnecessary rn 03/29/25
+//if (num_edge_loop <= min_num_edge_loop){
+//	num_edge_loop = min_num_edge_loop;// nav commented this out and replaced with 0; 02/27/25
+//}
 
 // Variable for the actual number of edges to loop through
-int true_num_edge_loop;
+int true_num_edge_loop=0;
 
-// Shuffle VectorShuffleForEdgeswapLoop and select edges for swapping
-if (VectorShuffleForEdgeswapLoop.size() < num_edge_loop ){
-    std::cout<<"Too few edges are available for the chosen edge swap sample size"<<std::endl;
-    std::cout<<"Will loop through the number of edge = min(num_edge_loop, VectorShuffleForEdgeswapLoop.size() = "<<VectorShuffleForEdgeswapLoop.size()<<std::endl;
-    true_num_edge_loop = VectorShuffleForEdgeswapLoop.size();
-}
-else{
-    true_num_edge_loop = num_edge_loop;
-}
+// Shuffle VectorShuffleForEdgeswapLoop and select edges for swapping. nav commented out. 03/29/25
+//if (VectorShuffleForEdgeswapLoop.size() < num_edge_loop ){
+//    std::cout<<"Too few edges are available for the chosen edge swap sample size"<<std::endl;
+//    std::cout<<"Will loop through the number of edge = min(num_edge_loop, VectorShuffleForEdgeswapLoop.size() = "<<VectorShuffleForEdgeswapLoop.size()<<std::endl;
+//    true_num_edge_loop = VectorShuffleForEdgeswapLoop.size();
+//}
+//else{
+//    true_num_edge_loop = num_edge_loop;
+//}
+//				
 				
-				
-std::shuffle(std::begin(VectorShuffleForEdgeswapLoop), std::end(VectorShuffleForEdgeswapLoop), generator_edgeswap);
+//std::shuffle(std::begin(VectorShuffleForEdgeswapLoop), std::end(VectorShuffleForEdgeswapLoop), generator_edgeswap);
 				
 
 
@@ -1743,22 +1743,22 @@ for (int i = 0; i < coordInfoVecs.num_triangles; i++){
 utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);//Currently this is treated as a backup of coordInfoVecs
 	
 // Update iteration and counters
-EDGESWAP_ALGORITHM_TRIGGERED = true;
+EDGESWAP_ALGORITHM_TRIGGERED = false;//true; nav commented out 03/29/25
 edgeswap_iteration += 1;
 translate_counter += 1;
 }
 
 
 		
-	  // Handle the case when edge swapping is not triggered as expected
-		if (EDGESWAP_ALGORITHM_TRIGGERED == false){
-			
-			std::cout<<"EDGE_SWAP IS TRIGGERED BECAUSE PREVIOUS RELAXATION STEPS SOMEHOW FAIL TO TRIGGER EDGESWAP NORMALLY. PLEASE INVESTIGATE."<<std::endl;
-			runSim = false;
-			initial_kT = -1;
-			Max_Runtime = 0.0;
-			break;
-		}
+	  // Handle the case when edge swapping is not triggered as expected. nav commented out 03/29/25
+//		if (EDGESWAP_ALGORITHM_TRIGGERED == false){
+//			
+//			std::cout<<"EDGE_SWAP IS TRIGGERED BECAUSE PREVIOUS RELAXATION STEPS SOMEHOW FAIL TO TRIGGER EDGESWAP NORMALLY. PLEASE INVESTIGATE."<<std::endl;
+//			runSim = false;
+//			initial_kT = -1;
+//			Max_Runtime = 0.0;
+//			break;
+//		}
 		
 		// Check if the allowed number of simulation steps is reached.
     if (edgeswap_iteration % (GROWTH_FREQUENCY*GROWTH_FREQUENCY_SCALE) == 0){
@@ -1846,7 +1846,7 @@ translate_counter += 1;
 
 // Growth algorithms and related operations
 
-
+//this -> hostSetInfoVecs;
 		// Define variable to store the effective growth frequency 
     int true_GROWTH_FREQUENCY;
 		
@@ -1857,196 +1857,266 @@ translate_counter += 1;
 				std::cout<<"GROWTH FREQUENCY CHANGED to mimic increase relaxation (ES) between growth attempts"<<std::endl;
 			}
 			// To turn off growth algorithm make sure that true_GROWTH_FREQUENCY is never zero. 
-      true_GROWTH_FREQUENCY = GROWTH_FREQUENCY2; // to turn off growth replace this value with 3.0 - Nav; 
+      true_GROWTH_FREQUENCY = 3.0;//GROWTH_FREQUENCY2; // to turn off growth replace this value with 3.0 - Nav; 
 			generalParams.strain_threshold = strain_threshold2;
 		}
 		else{
 			// To turn off growth algorithm make sure that true_GROWTH_FREQUENCY is never zero. 
-      true_GROWTH_FREQUENCY = GROWTH_FREQUENCY;// was this but nav changed it for flat code. // nav has changed it back to introduce growth into the equation once more. Let's see what happens. To turn off make it equal to 3.0. 8/26/2024  
+      true_GROWTH_FREQUENCY = 3.0;//GROWTH_FREQUENCY;// was this but nav changed it for flat code. // nav has changed it back to introduce growth into the equation once more. Let's see what happens. To turn off make it equal to 3.0. 8/26/2024  
       
 		}
-		
-    // Check if it's time for growth and if growth attempts are within limit
-    if (edgeswap_iteration % true_GROWTH_FREQUENCY == 0 && TOTAL_GROWTH_ATTEMPT < NUMBER_OF_GROWTH_EVENT){
-			std::cout<<"Entering growth algorithm"<<std::endl;
-			GROWTH_COUNTER += 1;
-			max_height = -10000.0;
-			double current_center_x = 0.0;
-			double current_center_y = 0.0;
-
-			// Find the center of nodes in the upper hemisphere
-      for (int k = 0; k < generalParams.maxNodeCount; k++){
-				if (generalParams.nodes_in_upperhem[k] == 1){
-					current_center_x += coordInfoVecs.nodeLocX[k];
-					current_center_y += coordInfoVecs.nodeLocX[k];
-				}
-				
-				// Find the node with max height
-        if (coordInfoVecs. nodeLocZ[k] >= max_height){
-					max_height = coordInfoVecs.nodeLocZ[k];
-					max_height_index = k;
-				}
-
-			}
-			current_center_x = current_center_x/generalParams.maxNodeCount;
-			current_center_y = current_center_y/generalParams.maxNodeCount;
-
-			// Calculate average height from boundary to tip
-      double bdry_to_tip_height = 0.0;
-			for (int y = 0; y < boundary_edge_list.size(); y++){
-
-				double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
-										coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
-
-				bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-			}
-
-
-			bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
 
 
 
-			// Initialize and populate VectorShuffleForGrowthLoop with eligible edges for growth
-      VectorShuffleForGrowthLoop.clear();
-			int VectorShuffleForGrowthLoop_COUNT = 0;
-
-			for (int y = 0; y < coordInfoVecs.num_edges; y++){
-				
-        // Check eligibility conditions for growth
-        if (generalParams.edges_in_upperhem_list[y] >= 0 &&
-					generalParams.edges_in_upperhem_list[y] != INT_MAX &&
-					generalParams.edges_in_upperhem_list[y] <= (INT_MAX-1000) &&
-					generalParams.edges_in_upperhem_list[y] >= (-INT_MAX+1000) &&
-					generalParams.boundaries_in_upperhem[y] != 1){
-						
-            // Check for valid nodes of the edge
-            if (coordInfoVecs.edges2Nodes_1[y] < 0 || coordInfoVecs.edges2Nodes_1[y] >= (INT_MAX-1000)){
-							continue;
-						}
-						else if (coordInfoVecs.edges2Nodes_2[y] < 0 || coordInfoVecs.edges2Nodes_2[y] >= (INT_MAX-1000)){
-							continue;
-						}
-
-
-						double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[y]] +
-												coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[y]])/2.0;
-
-
-						double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-
-// Part 15
-
-					// Check conditions for growth of new cell wall segments.
-          if ((current_edge_to_tip_height) <= generalParams.Rmin*current_edge_to_tip_height_scale && bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale)){
-
-            // If conditions are met, add the edge to the VectorShuffleForGrowthLoop list.
-						VectorShuffleForGrowthLoop.push_back(y);
-						VectorShuffleForGrowthLoop_COUNT += 1;
-					}
-
-
-					else if(bdry_to_tip_height < (generalParams.Rmin*bdry_to_tip_height_scale)){
-						
-            // If boundary tip height condition is not met, still add the edge to VectorShuffleForGrowthLoop.
-            VectorShuffleForGrowthLoop.push_back(y);
-						VectorShuffleForGrowthLoop_COUNT += 1;
-					}
-				}
-				
-				
-			}
-			
-
-			std::random_device rand_dev;
-			std::mt19937 generator3(rand_dev());
-			std::shuffle(std::begin(VectorShuffleForGrowthLoop), std::end(VectorShuffleForGrowthLoop), generator3);
-			int MAX_GROWTH_TEST = VectorShuffleForGrowthLoop.size();
-
-			int true_DELTA = 0;
-			int suitableForGrowthCounter = 0;
-
-			utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
-			int GROWTH_COUNT = 0;
-
-
-			// Loop through all edges to identify suitable edges for ppotential growth.
-      for (int p = 0; p < MAX_GROWTH_TEST; p++){
-				
-        // Skip invalid edges.
-        if (coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] == INT_MAX){
-					continue;
-				}
-				else if (coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] == INT_MAX){
-					continue;
-				}
-				
+if (translate_counter % translate_frequency == 0){
+    		
+            // Compute the new center of the system. 
+    				newcenterX = 0.0;
+    				newcenterY = 0.0;
+    				newcenterZ = 0.0;
+    					
+    					for (int i = 0; i < generalParams.maxNodeCount; i++){
+              	newcenterX += coordInfoVecs.nodeLocX[i];
+    						newcenterY += coordInfoVecs.nodeLocY[i];
+    						newcenterZ += coordInfoVecs.nodeLocZ[i];
+    					}
+        newcenterX = newcenterX/generalParams.maxNodeCount; 
+        newcenterY = newcenterY/generalParams.maxNodeCount; 
+        newcenterZ = newcenterZ/generalParams.maxNodeCount; 
         
-        // Find the candidate area for growth.
-        double candidate_area = utilities_ptr->find_suitable_location_to_grow(
-					VectorShuffleForGrowthLoop[p],
-					generalParams,
-					build_ptr->hostSetInfoVecs,
-					coordInfoVecs,
-					linearSpringInfoVecs,
-					bendingTriangleInfoVecs,
-					areaTriangleInfoVecs);
+        // Compute the displacement vector.
+        displacementX = newcenterX - generalParams.centerX;
+    		displacementY = newcenterY - generalParams.centerY;
+    		displacementZ = newcenterZ - generalParams.centerZ;
+    					
+    		// Update the positions of all nodes and LJ particles.
+        for (int i = 0; i < generalParams.maxNodeCount; i++){
+    					coordInfoVecs.nodeLocX[i] += -displacementX;
+    					coordInfoVecs.nodeLocY[i] += -displacementY;
+    					coordInfoVecs.nodeLocZ[i] += -displacementZ;
+    		}
+       
+    		for (int i = 0; i < ljInfoVecs.LJ_PosX_all.size(); i++){
+      			ljInfoVecs.LJ_PosX_all[i] += -displacementX;
+      			ljInfoVecs.LJ_PosY_all[i] += -displacementY;
+      			ljInfoVecs.LJ_PosZ_all[i] += -displacementZ;
+    		}
+        
+        //in the earlier parts there was a function to compute the new volume after calculating new center and then displacing nodes. 
+        }
 
 
-				// Check if the candidate area is positive to consider for growth.
-        if (candidate_area > 0.0){
-					suitableForGrowthCounter += 1;
-				}
-				
-			}
-			
-      // Print the count of suitable edges for growth and the count of shuffled edges.
-      std::cout<<"# of Suitable Edge to Growth : "<<suitableForGrowthCounter<<" "<<"VectorShuffleForGrowthLoop_COUNT : "<<VectorShuffleForGrowthLoop_COUNT<<std::endl;
+   
+//   // Check if it's time for growth and if growth attempts are within limit (figure out how to check for this)
+//     double centerX = 0.0, centerY = 0.0;
+//     int numNodes = coordInfoVecs.nodeLocX.size();
+//     for (int i = 0; i < numNodes; i++) {
+//         centerX += coordInfoVecs.nodeLocX[i];
+//         centerY += coordInfoVecs.nodeLocY[i];
+//     } 
+//    centerX /= numNodes;
+//    centerY /= numNodes;
+//  std::cout<< "new center = ("<<centerX<<", "<<centerY<<") "<<std::endl;
+
+double epsilon_r = 0.0, epsilon_t = 0.0;
+   
+generalParams.epsilon_r = epsilon_r;
+generalParams.epsilon_t = epsilon_t;
+     
+    //apply strain tensor to nodes. nav 03/29/25
+     applyStrainToEdges(
+             generalParams,
+             coordInfoVecs,//need to figure out how to store epsilon_r, epsilon_t, centerX and centerY      
+             linearSpringInfoVecs);
 
 
+//thrust::copy(hostSetInfoVecs.edge_initial_length.begin(),
+//             hostSetInfoVecs.edge_initial_length.end(),
+//             linearSpringInfoVecs.edge_initial_length.begin());
+//		linearSpringInfoVecs.edge_initial_length.resize(hostSetInfoVecs.edge_initial_length.size());
 
-			// Loop through suitable edges to perform actual growth if applicable.
-      for (int p = 0; p < VectorShuffleForGrowthLoop.size(); p++){
-				
-        // skip invalid edges.
-        if (coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] == INT_MAX){
-					continue;
-				}
-				else if (coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] == INT_MAX){
-					continue;
-				}
-				
-        // Perform growth on the edge and update growth counters. 
-        int DELTA = utilities_ptr->growth_host_vecs(
-					VectorShuffleForGrowthLoop[p],
-					generalParams,
-					build_ptr->hostSetInfoVecs,
-					coordInfoVecs,
-					linearSpringInfoVecs,
-					bendingTriangleInfoVecs,
-					areaTriangleInfoVecs);
-				if (DELTA >= 0){
-					GROWTH_COUNT += 1;//DELTA; // Increment growth counter.
-					TOTAL_GROWTH_COUNTER += 1;//DELTA; // Increment total growth counter.
-				}
-				if (GROWTH_COUNT >= MAX_GROWTH_PER_GROWTH_EVENT){
-					break; // Stop growth if maximum growth count is reached.
-				}
-        std::cout<<"DELTA = "<<DELTA<<std::endl;
-			}
 
-			// Update total growth attempt counter and transfer data back to the device.
-      TOTAL_GROWTH_ATTEMPT += 1;
+    // Check if it's time for growth and if growth attempts are within limit
+//    if (edgeswap_iteration % true_GROWTH_FREQUENCY == 0 && TOTAL_GROWTH_ATTEMPT < NUMBER_OF_GROWTH_EVENT){
+//			std::cout<<"Entering growth algorithm"<<std::endl;
+//			GROWTH_COUNTER += 1;
+//			max_height = -10000.0;
+//			double current_center_x = 0.0;
+//			double current_center_y = 0.0;
+//
+//			// Find the center of nodes in the upper hemisphere
+//      for (int k = 0; k < generalParams.maxNodeCount; k++){
+//				if (generalParams.nodes_in_upperhem[k] == 1){
+//					current_center_x += coordInfoVecs.nodeLocX[k];
+//					current_center_y += coordInfoVecs.nodeLocX[k];
+//				}
+//				
+//				// Find the node with max height
+//        if (coordInfoVecs. nodeLocZ[k] >= max_height){
+//					max_height = coordInfoVecs.nodeLocZ[k];
+//					max_height_index = k;
+//				}
+//
+//			}
+//			current_center_x = current_center_x/generalParams.maxNodeCount;
+//			current_center_y = current_center_y/generalParams.maxNodeCount;
+//
+//			// Calculate average height from boundary to tip
+//      double bdry_to_tip_height = 0.0;
+//			for (int y = 0; y < boundary_edge_list.size(); y++){
+//
+//				double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
+//										coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
+//
+//				bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//			}
+//
+//
+//			bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
+//
+//
+//
+//			// Initialize and populate VectorShuffleForGrowthLoop with eligible edges for growth
+//      VectorShuffleForGrowthLoop.clear();
+//			int VectorShuffleForGrowthLoop_COUNT = 0;
+//
+//			for (int y = 0; y < coordInfoVecs.num_edges; y++){
+//				
+//        // Check eligibility conditions for growth
+//        if (generalParams.edges_in_upperhem_list[y] >= 0 &&
+//					generalParams.edges_in_upperhem_list[y] != INT_MAX &&
+//					generalParams.edges_in_upperhem_list[y] <= (INT_MAX-1000) &&
+//					generalParams.edges_in_upperhem_list[y] >= (-INT_MAX+1000) &&
+//					generalParams.boundaries_in_upperhem[y] != 1){
+//						
+//            // Check for valid nodes of the edge
+//            if (coordInfoVecs.edges2Nodes_1[y] < 0 || coordInfoVecs.edges2Nodes_1[y] >= (INT_MAX-1000)){
+//							continue;
+//						}
+//						else if (coordInfoVecs.edges2Nodes_2[y] < 0 || coordInfoVecs.edges2Nodes_2[y] >= (INT_MAX-1000)){
+//							continue;
+//						}
+//
+//
+//						double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[y]] +
+//												coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[y]])/2.0;
+//
+//
+//						double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//
+//// Part 15
+//
+//					// Check conditions for growth of new cell wall segments.
+//          if ((current_edge_to_tip_height) <= generalParams.Rmin*current_edge_to_tip_height_scale && bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale)){
+//
+//            // If conditions are met, add the edge to the VectorShuffleForGrowthLoop list.
+//						VectorShuffleForGrowthLoop.push_back(y);
+//						VectorShuffleForGrowthLoop_COUNT += 1;
+//					}
+//
+//
+//					else if(bdry_to_tip_height < (generalParams.Rmin*bdry_to_tip_height_scale)){
+//						
+//            // If boundary tip height condition is not met, still add the edge to VectorShuffleForGrowthLoop.
+//            VectorShuffleForGrowthLoop.push_back(y);
+//						VectorShuffleForGrowthLoop_COUNT += 1;
+//					}
+//				}
+//				
+//				
+//			}
+//			
+//
+			std::random_device rand_dev;
+//			std::mt19937 generator3(rand_dev());
+//			std::shuffle(std::begin(VectorShuffleForGrowthLoop), std::end(VectorShuffleForGrowthLoop), generator3);
+//			int MAX_GROWTH_TEST = VectorShuffleForGrowthLoop.size();
+//
+//			int true_DELTA = 0;
+//			int suitableForGrowthCounter = 0;
+//
+			utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
+//			int GROWTH_COUNT = 0;
+//
+//
+//			// Loop through all edges to identify suitable edges for ppotential growth.
+//      for (int p = 0; p < MAX_GROWTH_TEST; p++){
+//				
+//        // Skip invalid edges.
+//        if (coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] == INT_MAX){
+//					continue;
+//				}
+//				else if (coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] == INT_MAX){
+//					continue;
+//				}
+//				
+//        
+//        // Find the candidate area for growth.
+//        double candidate_area = utilities_ptr->find_suitable_location_to_grow(
+//					VectorShuffleForGrowthLoop[p],
+//					generalParams,
+//					build_ptr->hostSetInfoVecs,
+//					coordInfoVecs,
+//					linearSpringInfoVecs,
+//					bendingTriangleInfoVecs,
+//					areaTriangleInfoVecs);
+//
+//
+//				// Check if the candidate area is positive to consider for growth.
+//        if (candidate_area > 0.0){
+//					suitableForGrowthCounter += 1;
+//				}
+//				
+//			}
+//			
+//      // Print the count of suitable edges for growth and the count of shuffled edges.
+//      std::cout<<"# of Suitable Edge to Growth : "<<suitableForGrowthCounter<<" "<<"VectorShuffleForGrowthLoop_COUNT : "<<VectorShuffleForGrowthLoop_COUNT<<std::endl;
+//
+//
+//
+//			// Loop through suitable edges to perform actual growth if applicable.
+//      for (int p = 0; p < VectorShuffleForGrowthLoop.size(); p++){
+//				
+//        // skip invalid edges.
+//        if (coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_1[VectorShuffleForGrowthLoop[p]] == INT_MAX){
+//					continue;
+//				}
+//				else if (coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] < 0 || coordInfoVecs.edges2Nodes_2[VectorShuffleForGrowthLoop[p]] == INT_MAX){
+//					continue;
+//				}
+//				
+//        // Perform growth on the edge and update growth counters. 
+//        int DELTA = utilities_ptr->growth_host_vecs(
+//					VectorShuffleForGrowthLoop[p],
+//					generalParams,
+//					build_ptr->hostSetInfoVecs,
+//					coordInfoVecs,
+//					linearSpringInfoVecs,
+//					bendingTriangleInfoVecs,
+//					areaTriangleInfoVecs);
+//				if (DELTA >= 0){
+//					GROWTH_COUNT += 1;//DELTA; // Increment growth counter.
+//					TOTAL_GROWTH_COUNTER += 1;//DELTA; // Increment total growth counter.
+//				}
+//				if (GROWTH_COUNT >= MAX_GROWTH_PER_GROWTH_EVENT){
+//					break; // Stop growth if maximum growth count is reached.
+//				}
+//        std::cout<<"DELTA = "<<DELTA<<std::endl;
+//			}
+
+//			// Update total growth attempt counter and transfer data back to the device.
+//      TOTAL_GROWTH_ATTEMPT += 1;
 			utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
-			
-      // Print growth-related statistics
-      std::cout<<"END GROWTH ALGORITHM"<<std::endl;
-			std::cout<<"number of cell wall insertion = "<<GROWTH_COUNT<<std::endl;
-			std::cout<<"Total growth event triggered = "<<TOTAL_GROWTH_COUNTER<<std::endl;
-			std::cout<<"Total growth event attempt = "<<TOTAL_GROWTH_ATTEMPT<<std::endl;
-			
-      
-				std::cout<<"Exiting growth algorithm"<<std::endl;
-			}	// End of growth algorithm.
+//			
+//      // Print growth-related statistics
+//      std::cout<<"END GROWTH ALGORITHM"<<std::endl;
+//			std::cout<<"number of cell wall insertion = "<<GROWTH_COUNT<<std::endl;
+//			std::cout<<"Total growth event triggered = "<<TOTAL_GROWTH_COUNTER<<std::endl;
+//			std::cout<<"Total growth event attempt = "<<TOTAL_GROWTH_ATTEMPT<<std::endl;
+//			
+//      
+//				std::cout<<"Exiting growth algorithm"<<std::endl;
+//			}	// End of growth algorithm.
 		} // End of iteration loop through time steps.
 	} // End of main loop through relaxation and growth events.
 };
@@ -2069,7 +2139,8 @@ void System::set_weak_builder(std::weak_ptr<SystemBuilder> _weak_bld_ptr) {
 // Function to initialize memory for thrust vectors and set coordInfoVecs values from input. 
 void System::initializeSystem(HostSetInfoVecs& hostSetInfoVecs) {
 	std::cout<<"Initializing"<<std::endl;
-
+ 
+ 
 	// Set the max node count, edge count and triangle count.
   generalParams.maxNodeCount = hostSetInfoVecs.nodeLocX.size();
 	coordInfoVecs.num_edges = hostSetInfoVecs.edges2Nodes_1.size();
@@ -2301,6 +2372,19 @@ std::cout<<"size of device fixed "<< coordInfoVecs.isNodeFixed.size()<<std::endl
 	
 	// Clear edge_initial_length vector for linear springs.
   linearSpringInfoVecs.edge_initial_length.clear();
+  
+  for (int e = 0; e < coordInfoVecs.num_edges; ++e) {
+    int i = coordInfoVecs.edges2Nodes_1[e];
+    int j = coordInfoVecs.edges2Nodes_2[e];
+    double dx = hostSetInfoVecs.nodeLocX[j] - hostSetInfoVecs.nodeLocX[i];
+    double dy = hostSetInfoVecs.nodeLocY[j] - hostSetInfoVecs.nodeLocY[i];
+    double dz = hostSetInfoVecs.nodeLocZ[j] - hostSetInfoVecs.nodeLocZ[i];
+    double dist = sqrt(dx*dx + dy*dy + dz*dz);
+    hostSetInfoVecs.edge_initial_length.push_back(dist);    // already done for initial
+    //std::cout<< "edge_rest_length = " << hostSetInfoVecs.edge_initial_length[i]<<std::endl; in the current data structure it gave me 1021 edges. That's good. Now that they have been initialized I should start changing the rest lengths. 
+    }
+// Copy to device
+linearSpringInfoVecs.edge_initial_length = hostSetInfoVecs.edge_initial_length;
 	
 	//Resize the hostSetInfoVecs for data transfer between host and device.
 	hostSetInfoVecs.isNodeFixed.resize(mem_prealloc*hostSetInfoVecs.nodeLocX.size());

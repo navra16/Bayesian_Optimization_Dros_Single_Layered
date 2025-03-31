@@ -343,6 +343,7 @@ struct LinearSpringInfoVecs {
 	double scalar_edge_length;
 	
 	thrust::device_vector<double> edge_initial_length;
+  thrust::device_vector<double> edge_rest_length;
 
   // Temporary vectors used for computation. 
 	thrust::device_vector<int> tempNodeIdUnreduced;
@@ -432,6 +433,10 @@ struct GeneralParams{
 	thrust::device_vector<int> no_weakening;
 	double septin_ring_z;
 	double boundary_z;
+ 
+ // Strain Tensor values
+ double epsilon_r;
+ double epsilon_t;
 
 };
 

@@ -1836,13 +1836,13 @@ void Utilities::triangles2Triangles_host_vecs(
             int edge3_n2 = hostSetInfoVecs.triangles2Nodes_1[elem];
             
             if(1 == elem) {
-                std::cout<<"edge1_n = ("<<edge1_n1<<","<<edge1_n2<<")"<<std::endl;
-                std::cout<<"edge2_n = ("<<edge2_n1<<","<<edge2_n2<<")"<<std::endl;
-                std::cout<<"edge3_n = ("<<edge3_n1<<","<<edge3_n2<<")"<<std::endl;
+                //std::cout<<"edge1_n = ("<<edge1_n1<<","<<edge1_n2<<")"<<std::endl;
+                //std::cout<<"edge2_n = ("<<edge2_n1<<","<<edge2_n2<<")"<<std::endl;
+                //std::cout<<"edge3_n = ("<<edge3_n1<<","<<edge3_n2<<")"<<std::endl;
             }
             
             if (edge1_n1 != edge3_n2){
-                std::cout<<"error: triangles2Triangles_host_vecs() => SOMETHING WENT WRONG SETTING UP THE NODE ORDER OF EDGES!"<<std::endl;
+              //  std::cout<<"error: triangles2Triangles_host_vecs() => SOMETHING WENT WRONG SETTING UP THE NODE ORDER OF EDGES!"<<std::endl;
             }
             int edge;
             for (int i = 0; i < 3; i++){
@@ -1858,10 +1858,10 @@ void Utilities::triangles2Triangles_host_vecs(
                 }
                 
                 if(1 == elem) {
-                    std::cout<<"tri = "<<elem<<"; i = "<<i<<"; edge = "<<edge<<std::endl;
+                   // std::cout<<"tri = "<<elem<<"; i = "<<i<<"; edge = "<<edge<<std::endl;
                     //std::cout<<"edge1_n1="<<edge1_n1<<"; edge1_n2 = "<<edge1_n2<<std::endl; 
-                    std::cout<<"edges2Tri_1 = "<<hostSetInfoVecs.edges2Triangles_1[edge]<<std::endl;
-                    std::cout<<"edges2Tri_2 = "<<hostSetInfoVecs.edges2Triangles_2[edge]<<std::endl;
+                  //  std::cout<<"edges2Tri_1 = "<<hostSetInfoVecs.edges2Triangles_1[edge]<<std::endl;
+                    //std::cout<<"edges2Tri_2 = "<<hostSetInfoVecs.edges2Triangles_2[edge]<<std::endl;
                     //std::cout<<"edges2Tri_3 = "<<hostSetInfoVecs.edges2Triangles_3[edge]<<std::endl;
                     std::cout<<std::endl;
                 }                

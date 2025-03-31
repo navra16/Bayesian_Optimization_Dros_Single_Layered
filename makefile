@@ -7,6 +7,7 @@ RM := rm -rf
 
 # Append the XMLParser object so that XMLParser.cpp gets compiled.
 OBJS += XMLParser.o
+OBJS += StrainTensor.o
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)
