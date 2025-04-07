@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=30G
 #SBATCH --cpus-per-task=1
-#SBATCH --output=_03_29_25_Testing_Strain_Tensor_# This affects the print out of the "std::cout" in the script, make sure this is changed for different jobs.
+#SBATCH --output=_04_07_25_NEW_Testing_Strain_Tensor_# This affects the print out of the "std::cout" in the script, make sure this is changed for different jobs.
 #SBATCH --mail-user=nsher012@ucr.edu
 #SBATCH --mail-type=ALL
 #SBATCH --job-name="dsp_test_2_circular"

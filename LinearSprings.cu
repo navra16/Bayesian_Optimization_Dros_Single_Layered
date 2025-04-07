@@ -6,8 +6,7 @@
 void ComputeLinearSprings(
     GeneralParams& generalParams,
     CoordInfoVecs& coordInfoVecs,
-    LinearSpringInfoVecs& linearSpringInfoVecs,
-    LJInfoVecs& ljInfoVecs) {
+    LinearSpringInfoVecs& linearSpringInfoVecs) {
 
         thrust::fill(linearSpringInfoVecs.tempNodeForceXReduced.begin(),linearSpringInfoVecs.tempNodeForceXReduced.end(),0.0);
         thrust::fill(linearSpringInfoVecs.tempNodeForceYReduced.begin(),linearSpringInfoVecs.tempNodeForceYReduced.end(),0.0);
@@ -50,7 +49,7 @@ void ComputeLinearSprings(
             linearSpringInfoVecs.spring_constant, 
             linearSpringInfoVecs.spring_constant_weak,
             /* Instead of generalParams.Rmin, pass the pointer to edge rest lengths: */
-            thrust::raw_pointer_cast(linearSpringInfoVecs.edge_initial_length.data()),
+            thrust::raw_pointer_cast(linearSpringInfoVecs.edge_rest_length.data()),
             thrust::raw_pointer_cast(generalParams.edges_in_upperhem.data()),
             //thrust::raw_pointer_cast(generalParams.boundaries_in_upperhem.data()),
             thrust::raw_pointer_cast(coordInfoVecs.nodeLocX.data()),

@@ -79,7 +79,37 @@ To run simulation on UCR HPCC cluster:
 9. *After compilation completes, enter*: exit;
 10. sbatch -p gpu --gres=gpu:1 --time=X:00:00 SBATCH_try_this_one_if_the_original_does_not_work.sh (*X here is the number of hours you want to keep the simulation running*)
 
-Current working module list:
+
+####################################################
+############# EVERSION SIMULATION ##################
+####################################################
+
+- Start with initial double layered data structure (seems to maintain it's structure better than the single layered model)
+- Separate the data structure into apical and basal and vertical springs. 
+- initialize spring constants for each of the three types separately. Potentially taken in through the data structure. The simulation flow is clear up until then. 
+- Vertical Spring constants maintained at a very high value to maintain their lengths. 
+- Apical Spring constants will be held at the weakest while the Basal Spring constants will be held at a higher value. 
+- Perform radius checks and maintain top and bottom at a threshold ratio. 
+- Implement volume conservation in the simulation and perform per cell volume checks in the simulation. 
+- Figure out what the trigger for eversion should be. 
+- Once the mesh has been created in the system.cu file:
+  - Implement relaxation to a certain number or till an energy minimum is reached. 
+  - Once energy minimum is reached exit the relaxation loop. 
+- Start the eversion process. 
+  - Implement strain tensor and let it gradient descent relax the mesh. 
+    - Other relaxation methods can be looked at as well instead of gradient descent. We can have a check in the program to switch between different methods of relaxation. 
+  - Do a volume conservation test. 
+  - Do a triangle skew test. 
+  - continue this process till either a desired shape is reached or till a certain number of strain steps are reached. 
+
+
+In more advanced versions of this code we will have three different segments that the wing disc is divided into. The wing boundary and two radial segments next to it. This can be separated in the system.cu and have separate computations/ spring constants and constraints on them. 
+
+#####################################################
+#####################################################
+##################################################### 
+
+
 
 
 

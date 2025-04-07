@@ -44,8 +44,7 @@ void System::Solve_Forces(){
    	ComputeLinearSprings(
   		generalParams, 
   		coordInfoVecs,
-  		linearSpringInfoVecs, 
-  		ljInfoVecs);
+  		linearSpringInfoVecs);
     
     // Compute forces and energy due to area springs. Nav commented out to test Active shape programming mesh type 02/27/2025  . Put back in 03/23/25
   	ComputeAreaTriangleSprings(  		
@@ -67,19 +66,19 @@ void System::Solve_Forces(){
   		bendingTriangleInfoVecs);
     
     // Compute forces and energy due to membrane repulsion springs.// Nav commented out to test Active shape programming mesh type 02/27/2025. PUt back in 03/23/25
-  	ComputeMemRepulsionSprings_local(
-  		coordInfoVecs,
-  		linearSpringInfoVecs, 
-  		capsidInfoVecs,
-  		generalParams,
-  		auxVecs);
+  	//ComputeMemRepulsionSprings_local(
+  		//coordInfoVecs,
+  		//linearSpringInfoVecs, 
+  		//capsidInfoVecs,
+  		//generalParams,
+  		//auxVecs);
   		
-    // Compute forces and energy due to volume springs. //(nav - commenting these out for now for flat surface 5/29/24) Nav had uncommented but she's bringing the comment back because testing out Active shape mesh 02/27/25
-  	ComputeVolume(
-  		generalParams,
-  		coordInfoVecs,
-  		linearSpringInfoVecs,
-  		ljInfoVecs);  
+    // Compute forces and energy due to volume springs. //(nav - commenting these out for now for flat surface 5/29/24) Nav had uncommented but she's bringing the comment back because testing out Active shape mesh 02/27/25 //STRAIN: This function should remain but there needs to be another function added that makes sure that there is volume conservation per each cell. 
+//  	ComputeVolume(
+//  		generalParams,
+//  		coordInfoVecs,
+//  		linearSpringInfoVecs,
+//  		ljInfoVecs);  
 		
 };
 
@@ -100,28 +99,28 @@ void System::solveSystem(){
 
 	  uint mem_prealloc = 4; //Make sure that this number is the same as set in System::initializeSystem found near the bottom of this script. - Kevin. Q. why is this the case? Why does it need to be the same? - Nav. 
 
-	  // Initial values for determining the region of material insertion.
+	  // Initial values for determining the region of material insertion. Not needed
 	  double current_edge_to_tip_height_scale = INT_MAX;//2.0; // The maximum edge to tip height scale, initially set to INT_MAX.
 	  std::cout<<"current_edge_to_tip_height_scale = "<<current_edge_to_tip_height_scale<<std::endl;
 	  
     // Determines how far away from the tip can new material be inserted during edge swap.
-	  double current_edge_to_tip_height_scale_ES = INT_MAX;//4.0;//2.0; // Initially set to INT_MAX
+	  double current_edge_to_tip_height_scale_ES = INT_MAX;//4.0;//2.0; // Initially set to INT_MAX. Not needed. 
 	std::cout<<"current_edge_to_tip_height_scale for edge-swap = "<<current_edge_to_tip_height_scale_ES<<std::endl;
 	
     //Determines how far away from the tip can new material be inserted.
-  	double bdry_to_tip_height_scale = INT_MAX;//4.0; // Initially set to INT_MAX
+  	double bdry_to_tip_height_scale = INT_MAX;//4.0; // Initially set to INT_MAX. No material needs to be inserted anymore. Not needed. 
 	  std::cout<<"bdry_to_tip_height_scale = "<<bdry_to_tip_height_scale<<std::endl;
 
-	  // Boolean flag to determine if restiffening is being simulated.
-    bool isRestiffening = true;//false; // change this to true (nav) - testing for FvK. was false but I have changed to true - nav 8/5/24
+	  // Boolean flag to determine if restiffening is being simulated. Not needed as the regions being simulated are not being changed in stiffness. 
+    bool isRestiffening = false;//true;//false; // change this to true (nav) - testing for FvK. was false but I have changed to true - nav 8/5/24
 	  std::cout<<"Are we simulating a case where restiffening or the restoration (even just partially) of mechanical properties? "<<isRestiffening<<" (bool) "<<std::endl;
   	
-    // Scaling factors for restiffening regions.
+    // Scaling factors for restiffening regions. Not needed 
     double scale_linear_restiff;
   	double scale_bend_restiff;
   	double scale_area_restiff;
    
-	  // If restiffening is enabled, calculate the scaling factors. 
+	  // If restiffening is enabled, calculate the scaling factors. Not needed. 
     if (isRestiffening == true){
         // Scale for linear springs in restiffening regions.
 		    scale_linear_restiff = linearSpringInfoVecs.spring_constant*0.1;//0.25;//25.0/2.5;//75.0/15.0; nav changing it to 0.1 8/5/24
@@ -136,17 +135,17 @@ void System::solveSystem(){
 		    std::cout<<"If restiff value is higher than that of the weakened case, something is wrong"<<std::endl;
 	  }
 
-  	// Flag to determine if the system has been triggered.
+  	// Flag to determine if the system has been triggered. This could be used to figure out if it's time for eversion. 
     bool triggered = false;
     
     // Initialize the current total simulation step. 
   	generalParams.current_total_sim_step = 0;
     
-    // Maximum relaxation steps before growth and edge swap.
+    // Maximum relaxation steps before growth and edge swap. Not edgeswap. Change this to relax_max_steps_before_eversion. 
   	int relax_max_steps_before_growth_and_edgeswap = 3e3;
   	std::cout<<"relax max steps before growth and edgeswap = "<<relax_max_steps_before_growth_and_edgeswap<<"*max_runTime"<<std::endl;
   
-    // Create a shared pointer for Utilities. 
+    // Create a shared pointer for Utilities. This could come in handy. Make changes in Utilities based on whatever values are updated or parsed.  
     auto utilities_ptr = std::make_shared<Utilities>(coordInfoVecs, generalParams);
     
     // Create a shared pointer for SystemBuilder.
@@ -200,7 +199,7 @@ void System::solveSystem(){
 		}
 	}
 	  
-// Calculate the cell height as the difference between the maximum and minimum cell triangle heights.
+// Calculate the cell height as the difference between the maximum and minimum cell triangle heights. Not needed. Instead use the max and min height to determine whether something is in the apical layer or the basal layer. This could be one way OR we could just input the apical and basal layers separately in the input data structure. 
 cell_height = (max_cell_triangle_height - min_cell_triangle_height);
 
 std::cout<<"Max_cell_triangle_height = "<< max_cell_triangle_height <<", min_cell_triangle_height = "<< min_cell_triangle_height<<std::endl;
@@ -224,42 +223,46 @@ std::cout<<"Determination of max triangle and min cell height complete."<<std::e
 // Set the node mass for the simulation. 
 generalParams.nodeMass = 1.0;
 
-// Initialize growth counter to keep track of growth events.
+// Initialize growth counter to keep track of growth events. Change this to EVERSION_COUNTER
 int GROWTH_COUNTER = 0;
 
-// Set the minimum number of edge loops for edge-swap during growth events.
+// Set the minimum number of edge loops for edge-swap during growth events. Not needed. 
 int min_num_edge_loop = 1;
 std::cout<<"min_num_edge_loop for edgeswap = "<<min_num_edge_loop<<std::endl;
 
-// DEfine max volume and bud area ratios for growth control.
-double MAX_VOLUME_RATIO = 2.0;
+//// DEfine max volume and bud area ratios for growth control. Not needed. 
+//double MAX_VOLUME_RATIO = 2.0;
 double MAX_BUD_AREA_RATIO = 100.0;
 
-// Set the maximum number of growth events per growth cycle. (INT_MAX means unlimited)
+// Set the maximum number of growth events per growth cycle. (INT_MAX means unlimited). Change this to MAX_EVERSION_PER_EVERSION_EVENT
 int MAX_GROWTH_PER_GROWTH_EVENT = 1;//INT_MAX;
 std::cout<<"MAX_GROWTH_NUMBER (# of edge to expand) per growth event = "<<MAX_GROWTH_PER_GROWTH_EVENT<<std::endl;
 
-// Set the frequency of growth events (how many times Max_Runtime has to be reached to perform growth).
+// Set the frequency of growth events (how many times Max_Runtime has to be reached to perform growth). Change this to the eversion equivalent.
 int GROWTH_FREQUENCY = 25;//150;//100;//95;//70;//25*3; // E.g., if Max_Runtime = 100, growth will occur every 25 time units.
 std::cout<<"GROWTH_FREQ (how many times Max_Runtime has to be reached to perform growth) = "<<GROWTH_FREQUENCY<<std::endl;
 	
-// Set growth frequency of growth events for variable edge-swap rate cases.  
+// Set growth frequency of growth events for variable edge-swap rate cases. Not needed.  
 int GROWTH_FREQUENCY2 = 25;//150;//100;//95;//70;//25*3;
 std::cout<<"GROWTH_FREQ2 (how many times Max_Runtime has to be reached to perform growth, for variable ES rate cases"<<GROWTH_FREQUENCY2<<std::endl;
 
-// Set the point of transition for growth events (describes the ratio of the total simulation time for relaxation (edge-swap) frequency to change). 
+// Set the point of transition for growth events (describes the ratio of the total simulation time for relaxation (edge-swap) frequency to change). Not sure what this is doing. 
 double pointOfTransition = 0.10; 
 std::cout<<"Point of transition describes the ratio of the total time simulation time is reached for relaxation (edge-swap) frequency to change : "<<pointOfTransition<<std::endl;
 std::cout<<"Point of transition is also used to indicate if strain_threshold needs to change or not"<<std::endl;
 
 // Set the energy gradient threshold for growth events.
-double energy_gradient_threshold = 0.02;//0.01; // Threshold used to trigger growth events based on energy gradients.
+double energy_gradient_threshold = 0.02;//0.01; // Threshold used to trigger growth events based on energy gradients. Figure out what the energy threshold gradient is for eversion to be triggered. 
 std::cout<<"ENERGY_GRADIENT_THRESHOLD = "<<energy_gradient_threshold<<std::endl;
 
-// Set kT_growth value for growth events.
+// Set kT_growth value for growth events. Change to kT_eversion. <- how is this kT being used. What is the mathematical purpose in growth. How is this different for eversion?
 generalParams.kT_growth = 1.0;
 
-// Set the SCALE_TYPE for weakening during growth events. (0 to 4)
+//////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// NOT NEEDED /////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+// Set the SCALE_TYPE for weakening during growth events. (0 to 4). This is a weakening that happens when we have growth. Without this growth cannot take place. For eversion to take place this is not needed anymore. What instead should we do for eversion?
 // 0:= Gaussian-like weakening
 // 1:= a1*(pow(x,b)) + a2*(1-pow(x,b)) type weakening
 // 2:= pure Gaussian weakening
@@ -300,6 +303,7 @@ if (generalParams.SCALE_TYPE == 4){
 	//generalParams.hilleqnconst = 0.9;
 	//generalParams.hilleqnpow = 40.0;
 
+///////////////////////////////////////////////////////////////// NOT SURE IF NEEDED - MAYBE FOR SEPARATE APICAL BASAL AND VERTICAL REGIONS /////////////////////////////////////
 // Declare vectors to store nodes, triangles and edges in the growth region. (nav - unsure if I need to take these out since we will not be performing growth)
 std::vector<int> nodes_in_growth;
 std::vector<int> triangles_in_growth;
@@ -309,6 +313,8 @@ std::vector<int> edges_in_growth;
 double dtb; //dtb := distance to boundary
 double dtb_max; //dtb_max := the max distance used to calculate the distance ratio in the Hill equation.
 	
+
+///////////////////////////// NOT NEEDED /////////////////////////////
 // Declare variables for sigma (for gradient distribution variance) and sigma_true (for Gaussian-related distribution variance) used in SCALE_TYPE 0.
 double sigma, sigma_true;
 
@@ -335,7 +341,10 @@ std::cout<<"GROWTH: critical strain threshold used for insertion probability cal
 generalParams.growth_energy_scaling = 1.0;//0.01375; // Set the scaling factor for growth energy.
 std::cout<<"GROWTH ENERGY SCALING FOR MATERIAL INSERTION PROBABILITY = "<<generalParams.growth_energy_scaling<<std::endl;
 
-// Set the neighbour safeguardthreshold (the max number of neighboring nodes a node can have).
+
+///////////////////////////////////// TILL HERE /////////////////////////////////////////////////
+
+// Set the neighbour safeguardthreshold (the max number of neighboring nodes a node can have). Could use this. Not a bad threshold. 
 generalParams.safeguardthreshold = 9;
 std::cout<<"NEIGHBOR SAFE GUARD THRESHOLD = "<<generalParams.safeguardthreshold<<std::endl;
 
@@ -350,7 +359,7 @@ std::cout<<"NEIGHBOR SAFE GUARD THRESHOLD = "<<generalParams.safeguardthreshold<
 
 // Setting various simulation parameters and initializing variables.
 
-// Initialize total growth counters to keep track of growth events.
+// Initialize total growth counters to keep track of growth events. Change this to TOTAL_EVERSION_COUNTER & TOTAL_EVERSION_ATTEMPT
 int TOTAL_GROWTH_COUNTER = 0;
 int TOTAL_GROWTH_ATTEMPT = 0;
 
@@ -363,13 +372,13 @@ double Max_RunStep = Max_Runtime/generalParams.dt; // Calculate the maximum runs
 std::cout<<"Max runtime = "<<Max_Runtime<<std::endl;
 std::cout<<"Max runstep = "<<Max_RunStep<<std::endl;
 
-// Boolean flag to determine if the simulation should continue running.
+// Boolean flag to determine if the simulation should continue running. Should keep this. 
 bool runSim = true;
 
-// Declare and initialize variables for growth-related calculations.
+// Declare and initialize variables for growth-related calculations. 
 int num_edge_loop;
 double initial_kT;
-initial_kT = generalParams.kT; // Stores the initial kT value for the acceptance of changes after looping through every edge within proximity. 
+initial_kT = generalParams.kT; // Stores the initial kT value for the acceptance of changes after looping through every edge within proximity. Find out mathematically what this is. 
 
 	// double SAMPLE_SIZE = 0.05;//0.025;
 	// std::cout<<"Sample ratio: "<<SAMPLE_SIZE<<std::endl;
@@ -379,24 +388,24 @@ initial_kT = generalParams.kT; // Stores the initial kT value for the acceptance
 double SAMPLE_SIZE = 2;
 std::cout<<"Sample size: "<<SAMPLE_SIZE<<std::endl;
 
-// Set the record frequency for the dsaving simulation data (time steps).
-int RECORD_TIME = 1; // round(Max_RunStep/2); Save data every time step.
+// Set the record frequency for the dsaving simulation data (time steps). Useful
+int RECORD_TIME = 1; // round(Max_RunStep/2); Save data every time step. Useful
 std::cout<<"Record frequency = "<<RECORD_TIME<<std::endl;
 
-//translate_frequency determines the frequency for the mesh to re-center and perform dynamical remeshing.
+//translate_frequency determines the frequency for the mesh to re-center and perform dynamical remeshing. Maybe not the remeshing part but should definitely keep for the re-centering and relaxing via different methods. 
 int translate_frequency = 10;
 std::cout<<"recentering of the model cell frequency = "<<translate_frequency<<std::endl;
 
-// Set the total number of growth events and targeted growth events for the simulation.
+// Set the total number of growth events and targeted growth events for the simulation. Change to NUMBER_OF_EVERSION_EVENTS
 int NUMBER_OF_GROWTH_EVENT = 1000; //changed by nav on 03/04/2025//200;//2000 - nav changed this for flat code. 6/2/24;//1000;//1000*2; // Total number of growth events. // Nav once again changed it to 1000 from 200. 8/26/24
-int NUMBER_OF_TARGETED_GROWTH_EVENT = 1; // Number of targeted growth events.
-int NKBT =GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT*2;// nav changed this 03/04/2025//10; // GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT*2; Nav changed this last one for the flat code. 6/5/24.//GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT;//10000;//7500; Nav is now changing it back from 10 to turn growth on. 8/26/24
+int NUMBER_OF_TARGETED_GROWTH_EVENT = 1; // Number of targeted growth events. Eversion events. 
+int NKBT =GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT*2;// nav changed this 03/04/2025//10; // GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT*2; Nav changed this last one for the flat code. 6/5/24.//GROWTH_FREQUENCY*NUMBER_OF_GROWTH_EVENT;//10000;//7500; Nav is now changing it back from 10 to turn growth on. 8/26/24. Find out the mathematics behind this 
 std::cout<<"Number of edge-swap per kBT value (or total number of edge-swap if kBT is fixed) = "<<NKBT<<std::endl;
 
-int GROWTH_FREQUENCY_SCALE = 4;
+int GROWTH_FREQUENCY_SCALE = 4; // Not sure if needed. 
 std::cout<<"GROWTH FREQ SCALE: decides how many growth event must be checked before recording the result = "<<GROWTH_FREQUENCY_SCALE<<std::endl;
 
-double min_kT = -0.1;//0.21;
+double min_kT = -0.1;//0.21; //Find out why kT is so important mathematically. 
 std::cout<<"min kT for simulation termination = "<<min_kT<<std::endl;
 
 // Initialize WHEN for conditional checks.
@@ -414,7 +423,7 @@ int Num_of_step_run = 0;
 // Initialize min_energy.
 double min_energy;
 
-// Count the total number of true edges (edges connected to valid nodes).
+// Count the total number of true edges (edges connected to valid nodes). This could come in very useful. 
 generalParams.true_num_edges = 0;
 for (int i = 0; i < coordInfoVecs.num_edges; i++){
     if (coordInfoVecs.edges2Nodes_1[i] != INT_MAX &&   coordInfoVecs.edges2Nodes_2[i] != INT_MAX){
@@ -438,24 +447,24 @@ std::vector<double> nodenormal_1(generalParams.maxNodeCount, 0.0);
 std::vector<double> nodenormal_2(generalParams.maxNodeCount, 0.0);
 std::vector<double> nodenormal_3(generalParams.maxNodeCount, 0.0);
 
-// Variable to keep track of how many times the linearSpringsInfoVecs.spring_constant_rep1 is reduced.
+// Variable to keep track of how many times the linearSpringsInfoVecs.spring_constant_rep1 is reduced. This is interesting. What is spring_constant_rep1? How does it differ from the rest of them?
 int reduce_counter = 0;
-
-// Set VOLUME_FACTOR to the maximum volume ratio (target volume = VOLUME_FACTOR * initial_volume).
-double VOLUME_FACTOR = MAX_VOLUME_RATIO;//1.6;//2.25; 
+//
+//// Set VOLUME_FACTOR to the maximum volume ratio (target volume = VOLUME_FACTOR * initial_volume). Not needed. 
+//double VOLUME_FACTOR = MAX_VOLUME_RATIO;//1.6;//2.25; 
 
 //double tip_depth = 0.5;
 //tip_depth is currently unused.
 
-// Line tension threshold for the activation of line tension (currently not used)
-double LINE_TENSION_THRESHOLD = -10000.0;
-std::cout<<"LINE TENSION THRESHOLD for activation of line tension = "<<LINE_TENSION_THRESHOLD<<std::endl;
+// Line tension threshold for the activation of line tension (currently not used). Anything related to line_tension not needed. 
+//double LINE_TENSION_THRESHOLD = -10000.0;
+//std::cout<<"LINE TENSION THRESHOLD for activation of line tension = "<<LINE_TENSION_THRESHOLD<<std::endl;
 
-// Volume threshold for the activation of weakened membrane (currently not used).
-double VOLUME_THRESHOLD = 0.0;
-std::cout<<"VOLUME THRESHOLD for activation of weakened membrane = "<<VOLUME_THRESHOLD<<std::endl;
+// Volume threshold for the activation of weakened membrane (currently not used). Not needed. 
+//double VOLUME_THRESHOLD = 0.0;
+//std::cout<<"VOLUME THRESHOLD for activation of weakened membrane = "<<VOLUME_THRESHOLD<<std::endl;
 
-// The minimum height of the z-coordinate of the membrane node to be considered in the area of weakened mechanical properties.
+// The minimum height of the z-coordinate of the membrane node to be considered in the area of weakened mechanical properties. Not needed. 
 double weakened =0.0; //1.90;//6.0; Nav changed it from 1.90 t0 0.0 to have weakened area increased. 8/26/24
 
 //double tip_base = 6.0;
@@ -467,6 +476,8 @@ double weakened =0.0; //1.90;//6.0; Nav changed it from 1.90 t0 0.0 to have weak
 // // 3:= If the combined area of the two triangles exceed 2*EXPAN_THRESHOLD.
 // // 4:= If a selected edges exceed the threshold value, split the triangles associated with the edge.
 
+
+///////////////////////// THIS SHOULD BE KEPT. USED TO RECENTER THE MESH ///////////////////////////
 
 for (int i = 0; i < generalParams.maxNodeCount; i++){
 		generalParams.centerX += coordInfoVecs.nodeLocX[i];
@@ -497,51 +508,58 @@ for (int k = 0; k < generalParams.maxNodeCount; k++){
     }
 }
 
+///////////////////// INSERT SEGMENT VOLUME CONTROL HERE ////////////////////////////////////
+
 	//Max and min height of the membrane nodes, these have to be changed if the mesh used is changed.
 
-// Set the equilibrium length of an edge of the triangle. 
-generalParams.Rmin = 0.001;//0.75;//0.5; nav changed this once again. Made it larger 11/7/24 //0.0001; nav changed this on 10/10/24 for the double layer code. This value of 0.0001 works for the circular sheet. //0.3012; changed by nav on 6/5/24 for flat code. //0.15; //equilibrium length (Nav) changed by nav again to 0.5 from 0.15. 8/5/24 11/8/24 5 worked for small number of nodes. < Nav
+// Set the equilibrium length of an edge of the triangle. Change this so that we now have an array that is being determined instead of a single parameter. 
+//generalParams.Rmin = 0.001;//0.75;//0.5; nav changed this once again. Made it larger 11/7/24 //0.0001; nav changed this on 10/10/24 for the double layer code. This value of 0.0001 works for the circular sheet. //0.3012; changed by nav on 6/5/24 for flat code. //0.15; //equilibrium length (Nav) changed by nav again to 0.5 from 0.15. 8/5/24 11/8/24 5 worked for small number of nodes. < Nav
 
-generalParams.abs_Rmin = generalParams.Rmin;//0.15;
-std::cout<<"abs_Rmin = "<<generalParams.abs_Rmin<<std::endl;
+//generalParams.abs_Rmin = generalParams.Rmin;//0.15;
+//std::cout<<"abs_Rmin = "<<generalParams.abs_Rmin<<std::endl;
+
+
+// The above Rmin parameters have been commented out because we have already initialized a vector that takes in the lengths of springs by calculating over the input mesh and then storing them in the vector. I should add a part where we override the calculated length edges. 
+
 
 //Equilibrium distance between membrane node for volume exclusion.
-// Initialize the following which represents the equilibrium triangular area.
-areaTriangleInfoVecs.initial_area = 1.0;//0.039;nav changed this to make it larger 11/7/24 //2835;//0.009808;//0.039;//0.03927344;//0.009817; 11/8/24 25 worked for small number of nodes. < Nav
+// Initialize the following which represents the equilibrium triangular area. Should make this into an array too. Have a minimum threshold for this. 
+areaTriangleInfoVecs.initial_area = 0.039;//nav changed this to make it larger 11/7/24 //2835;//0.009808;//0.039;//0.03927344;//0.009817; 11/8/24 25 worked for small number of nodes. < Nav
 std::cout<<"equilibrium triangular area = "<<areaTriangleInfoVecs.initial_area<<std::endl;
 	
 // Set ljInfoVecs parameters (currently all set to 0.0, indicating no interactions).
 
-// Equilibrium triangular area.
+// Equilibrium triangular area. Not needed. 
 ljInfoVecs.Rmin_M = 0.0;
 
-//Equilibrium distance between the nucleus particle and membrane.
+//Equilibrium distance between the nucleus particle and membrane. Not needed. 
 ljInfoVecs.Rcutoff_M = 0.0;
 
-//Maximal interaction range between the nucleus and membrane.
+//Maximal interaction range between the nucleus and membrane. Not needed. 
 ljInfoVecs.Rmin_LJ = 0.0;//3.0//1.0;
 
-//Equilibrium distance between nuclei.
+//Equilibrium distance between nuclei. Not needed. 
 ljInfoVecs.Rcutoff_LJ = 0.0;//3.0;//1.0;
 
-//Maximal interaction range between the nuclei.
+//Maximal interaction range between the nuclei. Not needed. 
 ljInfoVecs.epsilon_M_att1 = 0.0;//6.0;//16.0;
 ljInfoVecs.epsilon_M_att2 = 0.0;//1.0;//1.0;
 std::cout<<"Morse_NM_D_att = "<<ljInfoVecs.epsilon_M_att1<<std::endl;
 std::cout<<"Morse_NM_a_att = "<<ljInfoVecs.epsilon_M_att2<<std::endl;
 
-//Coefficient for the attractive interaction between nuclei and membrane.
+//Coefficient for the attractive interaction between nuclei and membrane. Not needed. 
 ljInfoVecs.epsilon_M_rep1 = 0.0;//12.5;//16.0;
 ljInfoVecs.epsilon_M_rep2 = 0.0;//0.5;//1.0;
 std::cout<<"Morse_NM_D_rep = "<<ljInfoVecs.epsilon_M_rep1<<std::endl;
 std::cout<<"Morse_NM_a_rep = "<<ljInfoVecs.epsilon_M_rep2<<std::endl;
 
-//Coefficient for the repulsive interaction between nuclei and membrane.	
+//Coefficient for the repulsive interaction between nuclei and membrane. Not needed 
 ljInfoVecs.epsilon_LJ_rep1 = 0.0;//10.0;//0.5;// 0.06;//7.5;
 ljInfoVecs.epsilon_LJ_rep2 = 0.0;//0.5;//1.0;//1.0;//1.0;
 std::cout<<"Morse_NN_D = "<<ljInfoVecs.epsilon_LJ_rep1<<std::endl;
 std::cout<<"Morse_NN_a = "<<ljInfoVecs.epsilon_LJ_rep2<<std::endl;
-//Coefficient of the interaction between nuclei.
+
+//Coefficient of the interaction between nuclei. Not needed. 
 
 linearSpringInfoVecs.spring_constant_rep1 = 0.01;//0.023;
 linearSpringInfoVecs.spring_constant_rep2 = 9.0;//5.0;
@@ -554,8 +572,8 @@ std::cout<<"Membrane volume exclusion Morse a = "<<linearSpringInfoVecs.spring_c
 generalParams.volume_spring_constant = 0.2;//(1.0/3.0)*areaTriangleInfoVecs.initial_area*1.0;
 std::cout<<"spring constant for surface normal expansion (pressure within the cell) = "<<generalParams.volume_spring_constant<<std::endl;
 
-generalParams.line_tension_constant = 0.0;//250.0; // Value that generated flat sheet is 0.0. 8/14/24
-std::cout<<"spring constant for the septin ring (before budding) = "<<generalParams.line_tension_constant<<std::endl;
+//generalParams.line_tension_constant = 0.0;//250.0; // Value that generated flat sheet is 0.0. 8/14/24
+//std::cout<<"spring constant for the septin ring (before budding) = "<<generalParams.line_tension_constant<<std::endl;
 
 // Equilibrium length of each segment of the septin ring.
 generalParams.length_scale =0.0; //1.0*generalParams.Rmin;//nav changed this from 0 to the current value to test the boundary nodes. 03/06/2025 //0.85;//0.1577;//1.0*generalParams.Rmin;// 0.8333; //nav changed this to be 0.0 from 1.0. 8/5/24; Flat sheet generated when septin ring was 0.0. 8/14/24
@@ -1024,16 +1042,16 @@ for (int i = 0; i < coordInfoVecs.num_edges; i++){
 
 // Part 9
 
-// Compute the initial volume of the system.
-ComputeVolume(
-		generalParams,
-		coordInfoVecs,
-		linearSpringInfoVecs,
-		ljInfoVecs
-);
-double initial_volume;
-
-std::cout<< "Initial volume = "<< initial_volume <<std::endl;
+//// Compute the initial volume of the system.
+//ComputeVolume(
+//		generalParams,
+//		coordInfoVecs,
+//		linearSpringInfoVecs,
+//		ljInfoVecs
+//);
+//double initial_volume; // not needed. 
+//
+//std::cout<< "Initial volume = "<< initial_volume <<std::endl;
 	
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -1108,6 +1126,7 @@ for (int u = 0; u < generalParams.maxNodeCount; u++){
 utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
 
 std::cout<<"STARTING THE ACTUAL SIMULATION"<<std::endl;
+runSim = false;
 
 // Run the actual simulation loop.
 while (runSim == true){
@@ -1142,8 +1161,8 @@ while (runSim == true){
 		std::cout<<"LINEAR ENERGY = "<<linearSpringInfoVecs.linear_spring_energy<<std::endl;
 		std::cout<<"BEND ENERGY = "<<bendingTriangleInfoVecs.bending_triangle_energy<<std::endl;
 		std::cout<<"AREA ENERGY = "<<areaTriangleInfoVecs.area_triangle_energy<<std::endl;
-		std::cout<<"VOLUME ENERGY = "<<generalParams.volume_energy<<std::endl;
-		std::cout<<"true_current_total_volume (before growth and edge swaps) = "<<generalParams.true_current_total_volume<<std::endl;
+	//	std::cout<<"VOLUME ENERGY = "<<generalParams.volume_energy<<std::endl;
+		//std::cout<<"true_current_total_volume (before growth and edge swaps) = "<<generalParams.true_current_total_volume<<std::endl;
 		std::cout<<"current KBT = "<<generalParams.kT<<std::endl;
 	
     if (std::isnan(new_total_energy)) {
@@ -1192,8 +1211,8 @@ while (runSim == true){
 		std::cout<<"spring constant for surface normal expansion (pressure within the cell) = "<<generalParams.volume_spring_constant<<std::endl;
     
     
-		generalParams.line_tension_constant = 0.0;//50.0 (nav commented this out for flat code 5/29/24) ;//250.0; was 50.0. Changed by nav // This is the spring constant for the septin ring. // Make this value same as mother cell (Task)
-		std::cout<<"spring constant for the septin ring = "<<generalParams.line_tension_constant<<std::endl;
+//		generalParams.line_tension_constant = 0.0;//50.0 (nav commented this out for flat code 5/29/24) ;//250.0; was 50.0. Changed by nav // This is the spring constant for the septin ring. // Make this value same as mother cell (Task)
+//		std::cout<<"spring constant for the septin ring = "<<generalParams.line_tension_constant<<std::endl;
 		
     generalParams.length_scale = 0.0;//0.85;//0.1577;//1.0*generalParams.Rmin;// 0.8333; //was 1.0 before nav made it 0.0 // Length scale for septin ring segments. Nav is making this 0.0 as well 8/5/24
 		std::cout<<"equilibrium length of each segment of the septin ring = "<<generalParams.length_scale<<std::endl;
@@ -1227,19 +1246,19 @@ while (runSim == true){
 		bendingTriangleInfoVecs.spring_constant_weak = scale_bend;
 		areaTriangleInfoVecs.spring_constant_weak = scale_area;
 		// Scaling of the weakend mechanical properties.
-		initial_volume = generalParams.true_current_total_volume;
-		generalParams.eq_total_volume = generalParams.true_current_total_volume*VOLUME_FACTOR;//This is for setting different equilibrium volume to mimic growth or shirnkage.
-		std::cout<<"true current total volume = "<<generalParams.true_current_total_volume<<std::endl;
-		std::cout<<"eq total volume = "<<generalParams.eq_total_volume<<std::endl;
+	//	initial_volume = generalParams.true_current_total_volume;
+	//	generalParams.eq_total_volume = generalParams.true_current_total_volume*VOLUME_FACTOR;//This is for setting different equilibrium volume to mimic growth or shirnkage.
+	//	std::cout<<"true current total volume = "<<generalParams.true_current_total_volume<<std::endl;
+		//std::cout<<"eq total volume = "<<generalParams.eq_total_volume<<std::endl;
 	
 		// Print VTK file for visualization.
-    storage->print_VTK_File();
+    //storage->print_VTK_File();
     
     // Initialize variables for the edge swap algorithm.
 		int edgeswap_iteration = 0; //nav changed this. Now it will try to edgeswap. 03/04/2025
 		num_edge_loop = 0;// nav changed this. 03/04/2025 // Number of edge loops used in the algorithm.
 
-		int LINE_TENSION_START = 3; // nav changed this from 0 to 3 on 03/29/2025
+	//	int LINE_TENSION_START = 3; // nav changed this from 0 to 3 on 03/29/2025
 		
 		bool WEAKENED_START = false; // nav is now changing this as well from false to true 8/26/24. Nav changed it back to false 8/26/24
 		bool EDGESWAP_ALGORITHM_TRIGGERED;
@@ -1262,180 +1281,180 @@ while (runSim == true){
 				
         current_time = 0.0;
 				translate_counter = 0;
-				double VOLUME_RATIO = generalParams.true_current_total_volume/generalParams.eq_total_volume;
+			//	double VOLUME_RATIO = generalParams.true_current_total_volume/generalParams.eq_total_volume;
 			
-   // std::cout<<"        IT GOT TILL HERE NAV - 3"<<std::endl;
-			  if (generalParams.true_current_total_volume/initial_volume >= LINE_TENSION_THRESHOLD && edgeswap_iteration == 0){
-            // Calculate the equuilibrium length of the septin ring.
-  					double DIST = 0.0;
-  					double COUNT = 0.0;
-  					for (int t = 0; t < coordInfoVecs.num_edges; t++){
-  						  if (generalParams.boundaries_in_upperhem[t] == 1){
-      					//		COUNT += 1.0;
-      					//		int node1 = coordInfoVecs.edges2Nodes_1[t];
-      					//		int node2 = coordInfoVecs.edges2Nodes_2[t];
-      					//		DIST += sqrt((coordInfoVecs.nodeLocX[node2] - coordInfoVecs.nodeLocX[node1])*(coordInfoVecs.nodeLocX[node2] - coordInfoVecs.nodeLocX[node1]) +
-						//	(coordInfoVecs.nodeLocY[node2] - coordInfoVecs.nodeLocY[node1])*(coordInfoVecs.nodeLocY[node2] - coordInfoVecs.nodeLocY[node1]) + 
-						//	(coordInfoVecs.nodeLocZ[node2] - coordInfoVecs.nodeLocZ[node1])*(coordInfoVecs.nodeLocZ[node2] - coordInfoVecs.nodeLocZ[node1]));
-						    }
-					  }
-  					
-    //std::cout<<"        IT GOT TILL HERE NAV - 4"<<std::endl;
-             // Calculate and set the equilibrium length of each segment of the septin ring.
-            std::cout<<"equilibrium length of each segment of the septin ring = "<<generalParams.length_scale*generalParams.Rmin<<std::endl;
-  					generalParams.eq_total_boundary_length = COUNT*generalParams.length_scale* generalParams.Rmin;
-  					std::cout<<"equilibrium length of the septin ring = "<<generalParams.eq_total_boundary_length<<std::endl;
- 					 LINE_TENSION_START += 1; //Nav commented this out because septin ring is no longer being used. 11/8/24.
-	
-				
-			}
+//   // std::cout<<"        IT GOT TILL HERE NAV - 3"<<std::endl;
+//			  if (generalParams.true_current_total_volume/initial_volume >= LINE_TENSION_THRESHOLD && edgeswap_iteration == 0){
+//            // Calculate the equuilibrium length of the septin ring.
+//  					double DIST = 0.0;
+//  					double COUNT = 0.0;
+//  					for (int t = 0; t < coordInfoVecs.num_edges; t++){
+//  						  if (generalParams.boundaries_in_upperhem[t] == 1){
+//      					//		COUNT += 1.0;
+//      					//		int node1 = coordInfoVecs.edges2Nodes_1[t];
+//      					//		int node2 = coordInfoVecs.edges2Nodes_2[t];
+//      					//		DIST += sqrt((coordInfoVecs.nodeLocX[node2] - coordInfoVecs.nodeLocX[node1])*(coordInfoVecs.nodeLocX[node2] - coordInfoVecs.nodeLocX[node1]) +
+//						//	(coordInfoVecs.nodeLocY[node2] - coordInfoVecs.nodeLocY[node1])*(coordInfoVecs.nodeLocY[node2] - coordInfoVecs.nodeLocY[node1]) + 
+//						//	(coordInfoVecs.nodeLocZ[node2] - coordInfoVecs.nodeLocZ[node1])*(coordInfoVecs.nodeLocZ[node2] - coordInfoVecs.nodeLocZ[node1]));
+//						    }
+//					  }
+//  					
+//    //std::cout<<"        IT GOT TILL HERE NAV - 4"<<std::endl;
+//             // Calculate and set the equilibrium length of each segment of the septin ring.
+//            std::cout<<"equilibrium length of each segment of the septin ring = "<<generalParams.length_scale*generalParams.Rmin<<std::endl;
+//  					generalParams.eq_total_boundary_length = COUNT*generalParams.length_scale* generalParams.Rmin;
+//  					std::cout<<"equilibrium length of the septin ring = "<<generalParams.eq_total_boundary_length<<std::endl;
+// 					 LINE_TENSION_START += 1; //Nav commented this out because septin ring is no longer being used. 11/8/24.
+//	
+//				
+//			}
 			
       EDGESWAP_ALGORITHM_TRIGGERED = false;//false; nav changed to true 03/04/2025
-			bool end_of_relaxation = false;
-			while (current_time < Max_Runtime){
-				number_of_simulation_step += 1;
-				if (Max_Runtime <= 0.0){
-					std::cout<<"Max_Runtime is set to be 0 or negative! "<<std::endl;
-					break;
-			}
-					
-			Solve_Forces();
-					
-			if (LINE_TENSION_START >= 1){
-          // Compute line tension springs if needed.
-					ComputeLineTensionSprings(
-						generalParams,
-						coordInfoVecs,
-						linearSpringInfoVecs);
-	    }					
-
-			AdvancePositions(
-  				coordInfoVecs,
-  				generalParams,
-  				domainParams);
-
-      // Calculate the new total energy of the system.
-      new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
-			areaTriangleInfoVecs.area_triangle_energy + 
-			bendingTriangleInfoVecs.bending_triangle_energy;// +
-			0.5*energy_rep;
-
-		  energy_gradient = sqrt((new_total_energy - old_total_energy)*(new_total_energy - old_total_energy))/old_total_energy;
-  		old_total_energy = new_total_energy;
-  		current_time+=generalParams.dt;	
-
-// Part 11  	
-        if (translate_counter % translate_frequency == 0){
-    		
-            // Compute the new center of the system. 
-    				newcenterX = 0.0;
-    				newcenterY = 0.0;
-    				newcenterZ = 0.0;
-    					
-    					for (int i = 0; i < generalParams.maxNodeCount; i++){
-              	newcenterX += coordInfoVecs.nodeLocX[i];
-    						newcenterY += coordInfoVecs.nodeLocY[i];
-    						newcenterZ += coordInfoVecs.nodeLocZ[i];
-    					}
-        newcenterX = newcenterX/generalParams.maxNodeCount; 
-        newcenterY = newcenterY/generalParams.maxNodeCount; 
-        newcenterZ = newcenterZ/generalParams.maxNodeCount; 
-        
-        // Compute the displacement vector.
-        displacementX = newcenterX - generalParams.centerX;
-    		displacementY = newcenterY - generalParams.centerY;
-    		displacementZ = newcenterZ - generalParams.centerZ;
-    					
-    		// Update the positions of all nodes and LJ particles.
-        for (int i = 0; i < generalParams.maxNodeCount; i++){
-    					coordInfoVecs.nodeLocX[i] += -displacementX;
-    					coordInfoVecs.nodeLocY[i] += -displacementY;
-    					coordInfoVecs.nodeLocZ[i] += -displacementZ;
-    		}
-       
-    		for (int i = 0; i < ljInfoVecs.LJ_PosX_all.size(); i++){
-      			ljInfoVecs.LJ_PosX_all[i] += -displacementX;
-      			ljInfoVecs.LJ_PosY_all[i] += -displacementY;
-      			ljInfoVecs.LJ_PosZ_all[i] += -displacementZ;
-    		}
-    
-    		// Recompute the volume of the system after the translation
-        ComputeVolume(
-    		generalParams,
-    			coordInfoVecs,
-    			linearSpringInfoVecs,
-    			ljInfoVecs); 
-
-    }
-
-}
-
-end_of_relaxation = true;
-double current_center_x = 0.0;
-double current_center_y = 0.0;
-double bdry_to_tip_height = 0.0;
-if (generalParams.SCALE_TYPE == 4){
-    max_height = -10000.0;
-    for (int k = 0; k < generalParams.maxNodeCount; k++){
-				if (generalParams.nodes_in_upperhem[k] == 1){
-					  current_center_x += coordInfoVecs.nodeLocX[k];
-					  current_center_y += coordInfoVecs.nodeLocX[k];
-				}
-				
-				if (coordInfoVecs. nodeLocZ[k] >= max_height){
-					max_height = coordInfoVecs.nodeLocZ[k];
-					max_height_index = k;
-				}
-
-    }
-    current_center_x = current_center_x/generalParams.maxNodeCount;
-    current_center_y = current_center_y/generalParams.maxNodeCount;
-    
-    if (generalParams.nonuniform_wall_weakening_bend == false && generalParams.nonuniform_wall_weakening_linear==false && generalParams.nonuniform_wall_weakening_area==false){
-				bdry_to_tip_height = 0.0;
-				
-        for (int y = 0; y < boundary_edge_list.size(); y++){
-					  double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
-											coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
-					  bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-				}
-		    bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
-				
-        for (int y = 0; y < coordInfoVecs.num_edges; y++){
-					  if (generalParams.edges_in_upperhem_list[y] >= 0 &&
-						generalParams.edges_in_upperhem_list[y] != INT_MAX &&
-						generalParams.edges_in_upperhem_list[y] <= (INT_MAX-1000) &&
-						generalParams.edges_in_upperhem_list[y] >= (-INT_MAX+1000) &&
-						generalParams.boundaries_in_upperhem[y] != 1){
-						if (coordInfoVecs.edges2Nodes_1[y] < 0 || coordInfoVecs.edges2Nodes_1[y] >= (INT_MAX-1000)){
-								continue;
-						}
-						else if (coordInfoVecs.edges2Nodes_2[y] < 0 || coordInfoVecs.edges2Nodes_2[y] >= (INT_MAX-1000)){
-								continue;
-						}
-						double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[y]] +
-													coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[y]])/2.0;
-						double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-						if (bdry_to_tip_height >= (generalParams.Rmin*generalParams.ratio_for_HillFunctionStiffness)){
-						if (generalParams.nonuniform_wall_weakening_bend==false && generalParams.nonuniform_wall_weakening_area==false && generalParams.nonuniform_wall_weakening_linear==false && display_token == true){
-								std::cout<<"generalParams.nonuniform_wall_weakening_XXXX is set to be true from this point"<<std::endl;
-								display_token = false;
-							}
-							generalParams.nonuniform_wall_weakening_bend = true;
-							generalParams.nonuniform_wall_weakening_area = true;
-							generalParams.nonuniform_wall_weakening_linear = true;
-							
-						}
-						else if(bdry_to_tip_height < (generalParams.Rmin*generalParams.ratio_for_HillFunctionStiffness)){
-							generalParams.nonuniform_wall_weakening_bend = false;
-							generalParams.nonuniform_wall_weakening_linear = false;
-							generalParams.nonuniform_wall_weakening_area = false;								
-						}
-					}				
-				}
-			}
-		}
-   
+	//		bool end_of_relaxation = false;
+//			while (current_time < Max_Runtime){
+//				number_of_simulation_step += 1;
+//				if (Max_Runtime <= 0.0){
+//					std::cout<<"Max_Runtime is set to be 0 or negative! "<<std::endl;
+//					break;
+//			}
+//					
+//			Solve_Forces();
+//					
+////			if (LINE_TENSION_START >= 1){
+////          // Compute line tension springs if needed.
+////					ComputeLineTensionSprings(
+////						generalParams,
+////						coordInfoVecs,
+////						linearSpringInfoVecs);
+////	    }					
+//
+//			AdvancePositions(
+//  				coordInfoVecs,
+//  				generalParams,
+//  				domainParams);
+//
+//      // Calculate the new total energy of the system.
+//      new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
+//			areaTriangleInfoVecs.area_triangle_energy + 
+//			bendingTriangleInfoVecs.bending_triangle_energy;// +
+//			0.5*energy_rep;
+//
+//		  energy_gradient = sqrt((new_total_energy - old_total_energy)*(new_total_energy - old_total_energy))/old_total_energy;
+//  		old_total_energy = new_total_energy;
+//  		current_time+=generalParams.dt;	
+//
+//// Part 11  	
+//        if (translate_counter % translate_frequency == 0){
+//    		
+//            // Compute the new center of the system. 
+//    				newcenterX = 0.0;
+//    				newcenterY = 0.0;
+//    				newcenterZ = 0.0;
+//    					
+//    					for (int i = 0; i < generalParams.maxNodeCount; i++){
+//              	newcenterX += coordInfoVecs.nodeLocX[i];
+//    						newcenterY += coordInfoVecs.nodeLocY[i];
+//    						newcenterZ += coordInfoVecs.nodeLocZ[i];
+//    					}
+//        newcenterX = newcenterX/generalParams.maxNodeCount; 
+//        newcenterY = newcenterY/generalParams.maxNodeCount; 
+//        newcenterZ = newcenterZ/generalParams.maxNodeCount; 
+//        
+//        // Compute the displacement vector.
+//        displacementX = newcenterX - generalParams.centerX;
+//    		displacementY = newcenterY - generalParams.centerY;
+//    		displacementZ = newcenterZ - generalParams.centerZ;
+//    					
+//    		// Update the positions of all nodes and LJ particles.
+//        for (int i = 0; i < generalParams.maxNodeCount; i++){
+//    					coordInfoVecs.nodeLocX[i] += -displacementX;
+//    					coordInfoVecs.nodeLocY[i] += -displacementY;
+//    					coordInfoVecs.nodeLocZ[i] += -displacementZ;
+//    		}
+//       
+//    		for (int i = 0; i < ljInfoVecs.LJ_PosX_all.size(); i++){
+//      			ljInfoVecs.LJ_PosX_all[i] += -displacementX;
+//      			ljInfoVecs.LJ_PosY_all[i] += -displacementY;
+//      			ljInfoVecs.LJ_PosZ_all[i] += -displacementZ;
+//    		}
+//    
+//    		// Recompute the volume of the system after the translation
+////        ComputeVolume(
+////    		generalParams,
+////    			coordInfoVecs,
+////    			linearSpringInfoVecs,
+////    			ljInfoVecs); 
+//
+//    }
+//
+//}
+//
+//end_of_relaxation = true;
+//double current_center_x = 0.0;
+//double current_center_y = 0.0;
+//double bdry_to_tip_height = 0.0;
+//if (generalParams.SCALE_TYPE == 4){
+//    max_height = -10000.0;
+//    for (int k = 0; k < generalParams.maxNodeCount; k++){
+//				if (generalParams.nodes_in_upperhem[k] == 1){
+//					  current_center_x += coordInfoVecs.nodeLocX[k];
+//					  current_center_y += coordInfoVecs.nodeLocX[k];
+//				}
+//				
+//				if (coordInfoVecs. nodeLocZ[k] >= max_height){
+//					max_height = coordInfoVecs.nodeLocZ[k];
+//					max_height_index = k;
+//				}
+//
+//    }
+//    current_center_x = current_center_x/generalParams.maxNodeCount;
+//    current_center_y = current_center_y/generalParams.maxNodeCount;
+//    
+//    if (generalParams.nonuniform_wall_weakening_bend == false && generalParams.nonuniform_wall_weakening_linear==false && generalParams.nonuniform_wall_weakening_area==false){
+//				bdry_to_tip_height = 0.0;
+//				
+//        for (int y = 0; y < boundary_edge_list.size(); y++){
+//					  double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
+//											coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
+//					  bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//				}
+//		    bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
+//				
+//        for (int y = 0; y < coordInfoVecs.num_edges; y++){
+//					  if (generalParams.edges_in_upperhem_list[y] >= 0 &&
+//						generalParams.edges_in_upperhem_list[y] != INT_MAX &&
+//						generalParams.edges_in_upperhem_list[y] <= (INT_MAX-1000) &&
+//						generalParams.edges_in_upperhem_list[y] >= (-INT_MAX+1000) &&
+//						generalParams.boundaries_in_upperhem[y] != 1){
+//						if (coordInfoVecs.edges2Nodes_1[y] < 0 || coordInfoVecs.edges2Nodes_1[y] >= (INT_MAX-1000)){
+//								continue;
+//						}
+//						else if (coordInfoVecs.edges2Nodes_2[y] < 0 || coordInfoVecs.edges2Nodes_2[y] >= (INT_MAX-1000)){
+//								continue;
+//						}
+//						double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[y]] +
+//													coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[y]])/2.0;
+//						double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//						if (bdry_to_tip_height >= (generalParams.Rmin*generalParams.ratio_for_HillFunctionStiffness)){
+//						if (generalParams.nonuniform_wall_weakening_bend==false && generalParams.nonuniform_wall_weakening_area==false && generalParams.nonuniform_wall_weakening_linear==false && display_token == true){
+//								std::cout<<"generalParams.nonuniform_wall_weakening_XXXX is set to be true from this point"<<std::endl;
+//								display_token = false;
+//							}
+//							generalParams.nonuniform_wall_weakening_bend = true;
+//							generalParams.nonuniform_wall_weakening_area = true;
+//							generalParams.nonuniform_wall_weakening_linear = true;
+//							
+//						}
+//						else if(bdry_to_tip_height < (generalParams.Rmin*generalParams.ratio_for_HillFunctionStiffness)){
+//							generalParams.nonuniform_wall_weakening_bend = false;
+//							generalParams.nonuniform_wall_weakening_linear = false;
+//							generalParams.nonuniform_wall_weakening_area = false;								
+//						}
+//					}				
+//				}
+//			}
+//		}
+//   
 
 // Part 12	
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1443,116 +1462,116 @@ if (generalParams.SCALE_TYPE == 4){
 		////////////////////////////////Run chemical diffusion//////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int MAX_LOOP = 1;
-
-// Check if growth is triggered
-if (triggered == true){
-		std::cout<<"Growth is triggered"<<std::endl;
-}
-
-// Check if it's time to reset the triggered flag 
-if (edgeswap_iteration == 0 || edgeswap_iteration%GROWTH_FREQUENCY==0){
-			triggered = false;
-}
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// Check if the SCALE_TYPE is 4 (specific condition defined above).
-if (generalParams.SCALE_TYPE ==4){
-    // Check if nonuniform wall weakening is enabled.
-    if (generalParams.nonuniform_wall_weakening_bend == true || generalParams.nonuniform_wall_weakening_linear==true || generalParams.nonuniform_wall_weakening_area==true){
-				dtb = 0.0;//dtb := distance to boundary
-				generalParams.septin_ring_z = 0.0;
-				generalParams.boundary_z = 0.0;
-		
-				// Calculate the distance to boundary and related values.
-        for (int k = 0; k < boundary_node_list.size(); k++){
-  					double n1 = boundary_node_list[k];
-  					double dist_x = current_center_x - coordInfoVecs.nodeLocX[n1];//coordInfoVecs.nodeLocX[max_height_index] - coordInfoVecs.nodeLocX[n1];//cent_of_edge_x;
-  					double dist_y = current_center_y - coordInfoVecs.nodeLocY[n1];//coordInfoVecs.nodeLocY[max_height_index] - coordInfoVecs.nodeLocY[n1];//cent_of_edge_y;
-  					double dist_z = max_height - coordInfoVecs.nodeLocZ[n1];//coordInfoVecs.nodeLocZ[max_height_index] - coordInfoVecs.nodeLocZ[n1];//cent_of_edge_z;
-  					double temp_dist = sqrt(dist_x*dist_x + dist_y*dist_y + dist_z*dist_z);
-  					
-            
-            if (temp_dist >= dtb){
-						dtb = temp_dist;
-						/* "dtb" will be used to identify where the septin ring is located, and used to determine the Hill coefficient*/
-					  }
-				}
-        
-				generalParams.septin_ring_z = generalParams.septin_ring_z/boundary_node_list.size();
-				generalParams.boundary_z = generalParams.septin_ring_z - generalParams.Rmin;
-				
-        // dtb will be only calculated once so we can effectively keep the Hill eqn curve consistent with only horizontal shift 
-        // Calculate max distance to boundary.
-				dtb_max = dtb + (generalParams.Rmin);
-				
-        // Calculate Hill equation constant.
-				generalParams.hilleqnconst = (dtb*dtb_scaler)/dtb_max;
-				std::cout<<"current hill constant K = "<<generalParams.hilleqnconst<<std::endl;
-
-        // Update host vectors and transfer data to device.
-				utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs); // Currently this is treated as a backup of coordInfoVecs
-				utilities_ptr->gradient_weakening_update_host_vecs(sigma,
-  					current_center_x,
-  					current_center_y,
-  					max_height,
-  					dtb,
-  					dtb_max,
-  					generalParams,
-  					coordInfoVecs,
-  					build_ptr->hostSetInfoVecs);
-				utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);//Currently this is treated as a backup of coordInfoVecs
-			  }
-		}	
-    
-    // Check if the relaxation loop has ended
-		if (end_of_relaxation == true){
-			std::random_device rand_dev;
-			std::mt19937 generator_edgeswap(rand_dev());
+//int MAX_LOOP = 1;
+//
+//// Check if growth is triggered
+//if (triggered == true){
+//		std::cout<<"Growth is triggered"<<std::endl;
+//}
+//
+//// Check if it's time to reset the triggered flag 
+//if (edgeswap_iteration == 0 || edgeswap_iteration%GROWTH_FREQUENCY==0){
+//			triggered = false;
+//}
+//		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//// Check if the SCALE_TYPE is 4 (specific condition defined above).
+//if (generalParams.SCALE_TYPE ==4){
+//    // Check if nonuniform wall weakening is enabled.
+//    if (generalParams.nonuniform_wall_weakening_bend == true || generalParams.nonuniform_wall_weakening_linear==true || generalParams.nonuniform_wall_weakening_area==true){
+//				dtb = 0.0;//dtb := distance to boundary
+//				generalParams.septin_ring_z = 0.0;
+//				generalParams.boundary_z = 0.0;
+//		
+//				// Calculate the distance to boundary and related values.
+//        for (int k = 0; k < boundary_node_list.size(); k++){
+//  					double n1 = boundary_node_list[k];
+//  					double dist_x = current_center_x - coordInfoVecs.nodeLocX[n1];//coordInfoVecs.nodeLocX[max_height_index] - coordInfoVecs.nodeLocX[n1];//cent_of_edge_x;
+//  					double dist_y = current_center_y - coordInfoVecs.nodeLocY[n1];//coordInfoVecs.nodeLocY[max_height_index] - coordInfoVecs.nodeLocY[n1];//cent_of_edge_y;
+//  					double dist_z = max_height - coordInfoVecs.nodeLocZ[n1];//coordInfoVecs.nodeLocZ[max_height_index] - coordInfoVecs.nodeLocZ[n1];//cent_of_edge_z;
+//  					double temp_dist = sqrt(dist_x*dist_x + dist_y*dist_y + dist_z*dist_z);
+//  					
+//            
+//            if (temp_dist >= dtb){
+//						dtb = temp_dist;
+//						/* "dtb" will be used to identify where the septin ring is located, and used to determine the Hill coefficient*/
+//					  }
+//				}
+//        
+//				generalParams.septin_ring_z = generalParams.septin_ring_z/boundary_node_list.size();
+//				generalParams.boundary_z = generalParams.septin_ring_z - generalParams.Rmin;
+//				
+//        // dtb will be only calculated once so we can effectively keep the Hill eqn curve consistent with only horizontal shift 
+//        // Calculate max distance to boundary.
+//				dtb_max = dtb + (generalParams.Rmin);
+//				
+//        // Calculate Hill equation constant.
+//				generalParams.hilleqnconst = (dtb*dtb_scaler)/dtb_max;
+//				std::cout<<"current hill constant K = "<<generalParams.hilleqnconst<<std::endl;
+//
+//        // Update host vectors and transfer data to device.
+//				utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs); // Currently this is treated as a backup of coordInfoVecs
+//				utilities_ptr->gradient_weakening_update_host_vecs(sigma,
+//  					current_center_x,
+//  					current_center_y,
+//  					max_height,
+//  					dtb,
+//  					dtb_max,
+//  					generalParams,
+//  					coordInfoVecs,
+//  					build_ptr->hostSetInfoVecs);
+//				utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);//Currently this is treated as a backup of coordInfoVecs
+//			  }
+//		}	
+//    
+//    // Check if the relaxation loop has ended
+//		if (end_of_relaxation == true){
+//			std::random_device rand_dev;
+//			std::mt19937 generator_edgeswap(rand_dev());
 			
-      // Calculate and update volume
-      ComputeVolume(
-					generalParams,
-				coordInfoVecs,
-					linearSpringInfoVecs,
-					ljInfoVecs);  
+//      // Calculate and update volume
+//      ComputeVolume(
+//					generalParams,
+//				coordInfoVecs,
+//					linearSpringInfoVecs,
+//					ljInfoVecs);  
       
       // Check if volume ratio conditions are met for termination. Nav commenting these out because volume termination does not count over here 8/26/24. Nav uncommented these because the volume termination now counts. 11/7/24
-     if ((generalParams.true_current_total_volume/initial_volume) < 0.6 || generalParams.true_current_total_volume/initial_volume >= MAX_VOLUME_RATIO){
-					
-          // Update true_num_edges and store data before terminating the simulation
-          generalParams.true_num_edges = 0;
-          
-          
-					for (int i = 0; i < coordInfoVecs.num_edges; i++){
-					  	if (coordInfoVecs.edges2Nodes_1[i] != INT_MAX && coordInfoVecs.edges2Nodes_2[i] != INT_MAX){
-							generalParams.true_num_edges += 1;
-						  }
-					}
-           
-					storage-> print_VTK_File();
-					
-          // Print appropriate message based on the termination reason.
-					if (generalParams.true_current_total_volume/initial_volume < 0.6){
-						std::cout<<"Cell over compression 60%"<<std::endl;
-					}
-					else if (generalParams.true_current_total_volume/initial_volume >= MAX_VOLUME_RATIO){
-						std::cout<<"Target volume ratio exceeded. Current volume ratio = "<<generalParams.true_current_total_volume/initial_volume<<std::endl;
-					}
-           
-           
-					// Print relevant simulation statistics
-          std::cout<<"Current number of edgeswap iteration performed at volume-related termination = "<<edgeswap_iteration<<std::endl;
-					std::cout<<"Current number of simulation step at volume-related termination = "<<number_of_simulation_step<<std::endl;
-          
-          // Termination simulation. Nav commented out for testing without volume thresholds 8/26/24
-					Max_Runtime = 0.0;
-					runSim = false;
-					initial_kT = -1;
-					break;
-				}
-					
+//     if ((generalParams.true_current_total_volume/initial_volume) < 0.6 || generalParams.true_current_total_volume/initial_volume >= MAX_VOLUME_RATIO){
+//					
+//           //Update true_num_edges and store data before terminating the simulation
+//          generalParams.true_num_edges = 0;
+//          
+//          
+//					for (int i = 0; i < coordInfoVecs.num_edges; i++){
+//					  	if (coordInfoVecs.edges2Nodes_1[i] != INT_MAX && coordInfoVecs.edges2Nodes_2[i] != INT_MAX){
+//							generalParams.true_num_edges += 1;
+//						  }
+//					}
+//           
+//					storage-> print_VTK_File();
+//					
+//           //Print appropriate message based on the termination reason.
+//					if (generalParams.true_current_total_volume/initial_volume < 0.6){
+//						std::cout<<"Cell over compression 60%"<<std::endl;
+//					}
+//					else if (generalParams.true_current_total_volume/initial_volume >= MAX_VOLUME_RATIO){
+//						std::cout<<"Target volume ratio exceeded. Current volume ratio = "<<generalParams.true_current_total_volume/initial_volume<<std::endl;
+//					}
+//           
+//           
+//					// Print relevant simulation statistics
+//          std::cout<<"Current number of edgeswap iteration performed at volume-related termination = "<<edgeswap_iteration<<std::endl;
+//					std::cout<<"Current number of simulation step at volume-related termination = "<<number_of_simulation_step<<std::endl;
+//          
+//          // Termination simulation. Nav commented out for testing without volume thresholds 8/26/24
+//					Max_Runtime = 0.0;
+//					runSim = false;
+//					initial_kT = -1;
+//					break;
+//				}
+//					
      
           // Calculate current bud surface area
           double current_bud_area = 0.0;
@@ -1604,80 +1623,80 @@ if (generalParams.SCALE_TYPE ==4){
 								generalParams.true_num_edges += 1;
 							}
 						}
-						storage-> print_VTK_File();
+				//		storage-> print_VTK_File();
 						
-						// Terminate the simulation
-            Max_Runtime = 0.0;
-						runSim = false;
-						initial_kT = -1;
-						break;
+//						// Terminate the simulation
+//            Max_Runtime = 0.0;
+//						runSim = false;
+//						initial_kT = -1;
+//						break;
 					}
 
 // Part 13
 
-// Transfer data from device to host
-utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
-				
-// VectorShuffleForEdgeswapLoop and initialize max_height	
-VectorShuffleForEdgeswapLoop.clear(); //Here is where the error begins - nav 03/23/2025
-max_height = -10000.0;
+//// Transfer data from device to host
+//utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
+//				
+//// VectorShuffleForEdgeswapLoop and initialize max_height	
+//VectorShuffleForEdgeswapLoop.clear(); //Here is where the error begins - nav 03/23/2025
+//max_height = -10000.0;
+//
+//// Find the node with the maximum height
+//for (int k = 0; k < generalParams.maxNodeCount; k++){					if (coordInfoVecs. nodeLocZ[k] >= max_height){
+//						max_height = coordInfoVecs.nodeLocZ[k];
+//						max_height_index = k;
+//    }
+//}
 
-// Find the node with the maximum height
-for (int k = 0; k < generalParams.maxNodeCount; k++){					if (coordInfoVecs. nodeLocZ[k] >= max_height){
-						max_height = coordInfoVecs.nodeLocZ[k];
-						max_height_index = k;
-    }
-}
-
-// Calculate average height from boundary to tip
-double bdry_to_tip_height = 0.0;
-for (int y = 0; y < boundary_edge_list.size(); y++){
-    
-    // Calculate midpoint height of the boundary edge
-    double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
-											coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
-					bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-}
-bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
-
-std::cout<< "bdry_to_tip_height = "<< bdry_to_tip_height<<std::endl;
-
-// Populate VectorShuffleForEdgeswapLoop with eligible edges
-for (int i = 0; i < coordInfoVecs.num_edges; i++){
-		
-    // Check eligibility conditions for edge swapping			
-    if (generalParams.edges_in_upperhem_list[i] >= 0 && 
-						generalParams.edges_in_upperhem_list[i] != INT_MAX &&
-						generalParams.boundaries_in_upperhem[i] != 1){
-				if (coordInfoVecs.edges2Nodes_1[i] < 0 || coordInfoVecs.edges2Nodes_1[i] >= (INT_MAX-1000)){
-				    continue;
-				}
-				else if (coordInfoVecs.edges2Nodes_2[i] < 0 || coordInfoVecs.edges2Nodes_2[i] >= (INT_MAX-1000)){
-				  	continue;
-				}
-						
-				double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[i]] +
-												coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[i]])/2.0;
-				double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
-				//if ((current_edge_to_tip_height) <= generalParams.Rmin*current_edge_to_tip_height_scale_ES && bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale)){//nav commented this out for flat edge case 6/5/24
-				if ((current_edge_to_tip_height) > 0.0){
-        			VectorShuffleForEdgeswapLoop.push_back(i);
-						}
-				else if(bdry_to_tip_height < (generalParams.Rmin*bdry_to_tip_height_scale)){
-							VectorShuffleForEdgeswapLoop.push_back(i);
-				}
-		}
-}
+//// Calculate average height from boundary to tip
+//double bdry_to_tip_height = 0.0;
+//for (int y = 0; y < boundary_edge_list.size(); y++){
+//    
+//    // Calculate midpoint height of the boundary edge
+//    double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[boundary_edge_list[y]]] +
+//											coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[boundary_edge_list[y]]])/2.0;
+//					bdry_to_tip_height += sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//}
+//bdry_to_tip_height = bdry_to_tip_height/boundary_edge_list.size();
+//
+//std::cout<< "bdry_to_tip_height = "<< bdry_to_tip_height<<std::endl;
+//
+//// Populate VectorShuffleForEdgeswapLoop with eligible edges
+//for (int i = 0; i < coordInfoVecs.num_edges; i++){
+//		
+//    // Check eligibility conditions for edge swapping			
+//    if (generalParams.edges_in_upperhem_list[i] >= 0 && 
+//						generalParams.edges_in_upperhem_list[i] != INT_MAX &&
+//						generalParams.boundaries_in_upperhem[i] != 1){
+//				if (coordInfoVecs.edges2Nodes_1[i] < 0 || coordInfoVecs.edges2Nodes_1[i] >= (INT_MAX-1000)){
+//				    continue;
+//				}
+//				else if (coordInfoVecs.edges2Nodes_2[i] < 0 || coordInfoVecs.edges2Nodes_2[i] >= (INT_MAX-1000)){
+//				  	continue;
+//				}
+//						
+//				double edge_mdpt_z = (coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_1[i]] +
+//												coordInfoVecs.nodeLocZ[coordInfoVecs.edges2Nodes_2[i]])/2.0;
+//				double current_edge_to_tip_height = sqrt(pow(coordInfoVecs.nodeLocZ[max_height_index] - edge_mdpt_z,2.0));
+//				//if ((current_edge_to_tip_height) <= generalParams.Rmin*current_edge_to_tip_height_scale_ES && bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale)){//nav commented this out for flat edge case 6/5/24
+//				if ((current_edge_to_tip_height) > 0.0){
+//        			VectorShuffleForEdgeswapLoop.push_back(i);
+//						}
+//				else if(bdry_to_tip_height < (generalParams.Rmin*bdry_to_tip_height_scale)){
+//							VectorShuffleForEdgeswapLoop.push_back(i);
+//				}
+//		}
+//}
 
 
-// Check if restiffening condition is met
-if (bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale) && isRestiffening == true){
-    linearSpringInfoVecs.spring_constant_weak = scale_linear_restiff;
-    bendingTriangleInfoVecs.spring_constant_weak = scale_bend_restiff;
-    areaTriangleInfoVecs.spring_constant_weak = scale_area_restiff;
-    std::cout<<"Restiffening of the bud triggered!"<<std::endl;
-    isRestiffening = false;
-}	
+//// Check if restiffening condition is met
+//if (bdry_to_tip_height >= (generalParams.Rmin*bdry_to_tip_height_scale) && isRestiffening == true){
+//    linearSpringInfoVecs.spring_constant_weak = scale_linear_restiff;
+//    bendingTriangleInfoVecs.spring_constant_weak = scale_bend_restiff;
+//    areaTriangleInfoVecs.spring_constant_weak = scale_area_restiff;
+//    std::cout<<"Restiffening of the bud triggered!"<<std::endl;
+//    isRestiffening = false;
+//}	
 
 // Determine the number of edges for edge swapping.
 num_edge_loop = SAMPLE_SIZE; //round(true_num_edges_in_upperhem*SAMPLE_SIZE); Nav is commenting out because she does not want to edgeswap. REplacing with SAMPLE_SIZE 02-27-2025 //SAMPLE_SIZE;<nav commented out and replaced with this 10/26/24 >  // round(true_num_edges_in_upperhem*SAMPLE_SIZE);
@@ -1704,49 +1723,49 @@ int true_num_edge_loop=0;
 //std::shuffle(std::begin(VectorShuffleForEdgeswapLoop), std::end(VectorShuffleForEdgeswapLoop), generator_edgeswap);
 				
 
+//
+//for (int edge_loop = 0; edge_loop < true_num_edge_loop; edge_loop++) {
+//													
+//    std::uniform_int_distribution<int> distribution(1,VectorShuffleForEdgeswapLoop.size());
+//    
+//    int dice_roll = distribution(generator_edgeswap);
+//    
+//    int edge = VectorShuffleForEdgeswapLoop[dice_roll - 1];
+//    while (generalParams.boundaries_in_upperhem[edge] == 1 || edge == INT_MAX || edge < 0){
+//				dice_roll = distribution(generator_edgeswap);
+//						
+//				int edge = VectorShuffleForEdgeswapLoop[dice_roll - 1];
+//						}
+//					if (edge < 0 || edge == INT_MAX){
+//						continue;
+//					}
+//
+//					int ALPHA = utilities_ptr->edge_swap_host_vecs(
+//						edge,
+//						generalParams,
+//						build_ptr->hostSetInfoVecs,
+//						linearSpringInfoVecs,
+//						bendingTriangleInfoVecs,
+//						areaTriangleInfoVecs);
+//					if (ALPHA != 0){
+//						needToRebuildDiffStructAfterEdgeSwap = true;
+//					}
+//				}
+//			
 
-for (int edge_loop = 0; edge_loop < true_num_edge_loop; edge_loop++) {
-													
-    std::uniform_int_distribution<int> distribution(1,VectorShuffleForEdgeswapLoop.size());
-    
-    int dice_roll = distribution(generator_edgeswap);
-    
-    int edge = VectorShuffleForEdgeswapLoop[dice_roll - 1];
-    while (generalParams.boundaries_in_upperhem[edge] == 1 || edge == INT_MAX || edge < 0){
-				dice_roll = distribution(generator_edgeswap);
-						
-				int edge = VectorShuffleForEdgeswapLoop[dice_roll - 1];
-						}
-					if (edge < 0 || edge == INT_MAX){
-						continue;
-					}
-
-					int ALPHA = utilities_ptr->edge_swap_host_vecs(
-						edge,
-						generalParams,
-						build_ptr->hostSetInfoVecs,
-						linearSpringInfoVecs,
-						bendingTriangleInfoVecs,
-						areaTriangleInfoVecs);
-					if (ALPHA != 0){
-						needToRebuildDiffStructAfterEdgeSwap = true;
-					}
-				}
-			
-
-// Update triangle connectivity after edge swapping			
-for (int i = 0; i < coordInfoVecs.num_triangles; i++){
-				utilities_ptr->triangles2Triangles_host_vecs(i, build_ptr->hostSetInfoVecs,coordInfoVecs,generalParams, auxVecs);
-}//loook hereeee
-
-// transfer updated data from host to device		
-utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);//Currently this is treated as a backup of coordInfoVecs
-	
-// Update iteration and counters
-EDGESWAP_ALGORITHM_TRIGGERED = false;//true; nav commented out 03/29/25
-edgeswap_iteration += 1;
-translate_counter += 1;
-}
+//// Update triangle connectivity after edge swapping			
+//for (int i = 0; i < coordInfoVecs.num_triangles; i++){
+//				utilities_ptr->triangles2Triangles_host_vecs(i, build_ptr->hostSetInfoVecs,coordInfoVecs,generalParams, auxVecs);
+//}//loook hereeee
+//
+//// transfer updated data from host to device		
+//utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);//Currently this is treated as a backup of coordInfoVecs
+//	
+//// Update iteration and counters
+//EDGESWAP_ALGORITHM_TRIGGERED = false;//true; nav commented out 03/29/25
+//edgeswap_iteration += 1;
+//translate_counter += 1;
+//}
 
 
 		
@@ -1761,80 +1780,80 @@ translate_counter += 1;
 //		}
 		
 		// Check if the allowed number of simulation steps is reached.
-    if (edgeswap_iteration % (GROWTH_FREQUENCY*GROWTH_FREQUENCY_SCALE) == 0){
-				for (int v = 0; v < coordInfoVecs.num_edges; v++){
-				double ev1 = coordInfoVecs.edges2Nodes_1[v];
-				double ev2 = coordInfoVecs.edges2Nodes_2[v];
-				if (ev1 == INT_MAX || ev2 == INT_MAX){
-					continue;
-				}
-				double ed = sqrt((coordInfoVecs.nodeLocX[ev2] - coordInfoVecs.nodeLocX[ev1])*(coordInfoVecs.nodeLocX[ev2] - coordInfoVecs.nodeLocX[ev1]) +
-							(coordInfoVecs.nodeLocY[ev2] - coordInfoVecs.nodeLocY[ev1])*(coordInfoVecs.nodeLocY[ev2] - coordInfoVecs.nodeLocY[ev1]) +
-							(coordInfoVecs.nodeLocZ[ev2] - coordInfoVecs.nodeLocZ[ev1])*(coordInfoVecs.nodeLocZ[ev2] - coordInfoVecs.nodeLocZ[ev1]));
-				if (ed >= 2.0){
-					std::cout<<"Edge over extension, possibly some instability occuring. Aborting the simulation."<<std::endl;
-					runSim = false;
-					initial_kT = -1;
-					break;
-				}
-			}
-			generalParams.true_num_edges = 0;
-			for (int i = 0; i < coordInfoVecs.num_edges; i++){
-				if (coordInfoVecs.edges2Nodes_1[i] != INT_MAX && coordInfoVecs.edges2Nodes_2[i] != INT_MAX){
-					generalParams.true_num_edges += 1;
-				}
-				}
-				storage->print_VTK_File();
-				double current_bud_area = 0.0;
-				for (int k = 0; k < coordInfoVecs.num_triangles; k++){
-				if (coordInfoVecs.triangles2Nodes_1[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_1[k] <= (-INT_MAX + 1000.0) ||
-					coordInfoVecs.triangles2Nodes_2[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_2[k] <= (-INT_MAX + 1000.0) ||
-					coordInfoVecs.triangles2Nodes_3[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_3[k] <= (-INT_MAX + 1000.0)){
-							continue;
-						}
-				else{
-					if (generalParams.triangles_in_upperhem[k] == 1){
-						double r1x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_1[k]];
-						double r1y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_1[k]];
-						double r1z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_1[k]];
-						double r2x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_2[k]];
-						double r2y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_2[k]];
-						double r2z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_2[k]];
-						double r3x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_3[k]];
-						double r3y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_3[k]];
-						double r3z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_3[k]];
-						double norm_r1r2 = sqrt((r2x-r1x)*(r2x-r1x) + (r2y-r1y)*(r2y-r1y) + (r2z-r1z)*(r2z-r1z));
-						double norm_r2r3 = sqrt((r3x-r2x)*(r3x-r2x) + (r3y-r2y)*(r3y-r2y) + (r3z-r2z)*(r3z-r2z));
-						double norm_r3r1 = sqrt((r3x-r1x)*(r3x-r1x) + (r3y-r1y)*(r3y-r1y) + (r3z-r1z)*(r3z-r1z));
-						double s = (norm_r1r2 + norm_r2r3 + norm_r3r1)/2.0;
-						double area = sqrt(s*(s-norm_r1r2)*(s-norm_r2r3)*(s-norm_r3r1));
-						current_bud_area += area;
-					}
-				}
-				}
-				std::cout<<"Current bud surface area = "<<current_bud_area<<std::endl;
-				std::cout<<"Current number of edgeswap performed = "<<edgeswap_iteration<<std::endl;
-				std::cout<<"current total energy = "<< new_total_energy<<std::endl;
-				std::cout<<"energy_gradient = "<<energy_gradient<<std::endl;
-				std::cout<<"true current total volume = "<<generalParams.true_current_total_volume<<std::endl;
-			std::cout<<"equilibrium total volume = "<<generalParams.eq_total_volume<<std::endl;
-		}
-		
-    // Check if the allowed number of simulation steps is reached
-    if (edgeswap_iteration == NKBT-1 ){
-			true_num_edges_in_upperhem = 0;
-			for (int i = 0; i < coordInfoVecs.num_edges; i++){
-				if (generalParams.edges_in_upperhem_list[i] != INT_MAX && generalParams.edges_in_upperhem_list[i] >= 0){
-					true_num_edges_in_upperhem += 1;
-					//break;
-				}
-			}
-			storage->print_VTK_File();
-			std::cout<<"Allowed number of simulation steps reached. Simulation terminated."<<std::endl;
-			runSim = false;
-			initial_kT = -1;
-			break;
-			}
+//    if (edgeswap_iteration % (GROWTH_FREQUENCY*GROWTH_FREQUENCY_SCALE) == 0){
+//				for (int v = 0; v < coordInfoVecs.num_edges; v++){
+//				double ev1 = coordInfoVecs.edges2Nodes_1[v];
+//				double ev2 = coordInfoVecs.edges2Nodes_2[v];
+//				if (ev1 == INT_MAX || ev2 == INT_MAX){
+//					continue;
+//				}
+//				double ed = sqrt((coordInfoVecs.nodeLocX[ev2] - coordInfoVecs.nodeLocX[ev1])*(coordInfoVecs.nodeLocX[ev2] - coordInfoVecs.nodeLocX[ev1]) +
+//							(coordInfoVecs.nodeLocY[ev2] - coordInfoVecs.nodeLocY[ev1])*(coordInfoVecs.nodeLocY[ev2] - coordInfoVecs.nodeLocY[ev1]) +
+//							(coordInfoVecs.nodeLocZ[ev2] - coordInfoVecs.nodeLocZ[ev1])*(coordInfoVecs.nodeLocZ[ev2] - coordInfoVecs.nodeLocZ[ev1]));
+//				if (ed >= 2.0){
+//					std::cout<<"Edge over extension, possibly some instability occuring. Aborting the simulation."<<std::endl;
+//					runSim = false;
+//					initial_kT = -1;
+//					break;
+//				}
+//			}
+//			generalParams.true_num_edges = 0;
+//			for (int i = 0; i < coordInfoVecs.num_edges; i++){
+//				if (coordInfoVecs.edges2Nodes_1[i] != INT_MAX && coordInfoVecs.edges2Nodes_2[i] != INT_MAX){
+//					generalParams.true_num_edges += 1;
+//				}
+//				}
+//			//	storage->print_VTK_File();
+//				double current_bud_area = 0.0;
+//				for (int k = 0; k < coordInfoVecs.num_triangles; k++){
+//				if (coordInfoVecs.triangles2Nodes_1[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_1[k] <= (-INT_MAX + 1000.0) ||
+//					coordInfoVecs.triangles2Nodes_2[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_2[k] <= (-INT_MAX + 1000.0) ||
+//					coordInfoVecs.triangles2Nodes_3[k] >= (INT_MAX - 1000.0) || coordInfoVecs.triangles2Nodes_3[k] <= (-INT_MAX + 1000.0)){
+//							continue;
+//						}
+//				else{
+//					if (generalParams.triangles_in_upperhem[k] == 1){
+//						double r1x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_1[k]];
+//						double r1y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_1[k]];
+//						double r1z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_1[k]];
+//						double r2x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_2[k]];
+//						double r2y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_2[k]];
+//						double r2z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_2[k]];
+//						double r3x = coordInfoVecs.nodeLocX[coordInfoVecs.triangles2Nodes_3[k]];
+//						double r3y = coordInfoVecs.nodeLocY[coordInfoVecs.triangles2Nodes_3[k]];
+//						double r3z = coordInfoVecs.nodeLocZ[coordInfoVecs.triangles2Nodes_3[k]];
+//						double norm_r1r2 = sqrt((r2x-r1x)*(r2x-r1x) + (r2y-r1y)*(r2y-r1y) + (r2z-r1z)*(r2z-r1z));
+//						double norm_r2r3 = sqrt((r3x-r2x)*(r3x-r2x) + (r3y-r2y)*(r3y-r2y) + (r3z-r2z)*(r3z-r2z));
+//						double norm_r3r1 = sqrt((r3x-r1x)*(r3x-r1x) + (r3y-r1y)*(r3y-r1y) + (r3z-r1z)*(r3z-r1z));
+//						double s = (norm_r1r2 + norm_r2r3 + norm_r3r1)/2.0;
+//						double area = sqrt(s*(s-norm_r1r2)*(s-norm_r2r3)*(s-norm_r3r1));
+//						current_bud_area += area;
+//					}
+//				}
+//				}
+//				std::cout<<"Current bud surface area = "<<current_bud_area<<std::endl;
+//				std::cout<<"Current number of edgeswap performed = "<<edgeswap_iteration<<std::endl;
+//				std::cout<<"current total energy = "<< new_total_energy<<std::endl;
+//				std::cout<<"energy_gradient = "<<energy_gradient<<std::endl;
+//				std::cout<<"true current total volume = "<<generalParams.true_current_total_volume<<std::endl;
+//			std::cout<<"equilibrium total volume = "<<generalParams.eq_total_volume<<std::endl;
+//		}
+//		
+//    // Check if the allowed number of simulation steps is reached
+//    if (edgeswap_iteration == NKBT-1 ){
+//			true_num_edges_in_upperhem = 0;
+//			for (int i = 0; i < coordInfoVecs.num_edges; i++){
+//				if (generalParams.edges_in_upperhem_list[i] != INT_MAX && generalParams.edges_in_upperhem_list[i] >= 0){
+//					true_num_edges_in_upperhem += 1;
+//					//break;
+//				}
+//			}
+//			//storage->print_VTK_File();
+//			std::cout<<"Allowed number of simulation steps reached. Simulation terminated."<<std::endl;
+////			runSim = false;
+////			initial_kT = -1;
+////			break;
+//			}
 
 
 // When making a flat code turn off the following. Nav. 
@@ -1904,30 +1923,327 @@ if (translate_counter % translate_frequency == 0){
         
         //in the earlier parts there was a function to compute the new volume after calculating new center and then displacing nodes. 
         }
+} // End of main loop through relaxation and growth events.
+};// this was moved from line 2436 to here. 
 
 
+
+// Initial relaxation of the mesh:
+std::cout<<"Starting initial relaxation"<<std::endl;
+storage->print_VTK_File();
+
+//struct ForceMagnitude {
+//    __host__ __device__
+//    double operator()(const thrust::tuple<double, double, double>& t) const {
+//        double fx = thrust::get<0>(t);
+//        double fy = thrust::get<1>(t);
+//        double fz = thrust::get<2>(t);
+//        return sqrt(fx * fx + fy * fy + fz * fz);
+//    }
+//};
+
+
+// Run the actual simulation loop.
+//while (runSim == true){
+		double current_time = 0.0;
+		int translate_counter = 0;
+		
    
-//   // Check if it's time for growth and if growth attempts are within limit (figure out how to check for this)
-//     double centerX = 0.0, centerY = 0.0;
-//     int numNodes = coordInfoVecs.nodeLocX.size();
-//     for (int i = 0; i < numNodes; i++) {
-//         centerX += coordInfoVecs.nodeLocX[i];
-//         centerY += coordInfoVecs.nodeLocY[i];
-//     } 
-//    centerX /= numNodes;
-//    centerY /= numNodes;
-//  std::cout<< "new center = ("<<centerX<<", "<<centerY<<") "<<std::endl;
+        // Pre-relaxation: relax the initial flat mesh until forces converge
+        const int preRelaxSteps = 3000;      // Maximum allowed iterations
+        const double forceThreshold = 1e-6;  // Convergence threshold for maximum node force
+        const double energyThreshold = 1e-8; // Convergence threshold for change in energy
+        bool converged = false;
+        double prevEnergy = std::numeric_limits<double>::infinity();
+        
+storage->print_VTK_File();        
+        
+        for (int i = 0; i < preRelaxSteps; i++) {
+            Solve_Forces(); // Compute forces and update energies
+            AdvancePositions(coordInfoVecs, generalParams, domainParams); // Update node positions
+        
+            // Update current time
+            current_time += generalParams.dt;
+        
+            // Compute the maximum force magnitude over all nodes:
+            double maxForce = thrust::transform_reduce(
+                thrust::make_zip_iterator(thrust::make_tuple(
+                    coordInfoVecs.nodeForceX.begin(),
+                    coordInfoVecs.nodeForceY.begin(),
+                    coordInfoVecs.nodeForceZ.begin())),
+                thrust::make_zip_iterator(thrust::make_tuple(
+                    coordInfoVecs.nodeForceX.end(),
+                    coordInfoVecs.nodeForceY.end(),
+                    coordInfoVecs.nodeForceZ.end())),
+                ForceMagnitude(), 0.0, thrust::maximum<double>());
+        
+            // Compute total energy (assuming Solve_Forces() updates these)
+            double linearEnergy = linearSpringInfoVecs.linear_spring_energy;
+            double bendingEnergy = bendingTriangleInfoVecs.bending_triangle_energy;
+            double totalEnergy = linearSpringInfoVecs.linear_spring_energy + 
+        			areaTriangleInfoVecs.area_triangle_energy + 
+        			bendingTriangleInfoVecs.bending_triangle_energy;// +0.5*energy_rep;
+        
+            std::cout << "Pre-relaxation iteration " << i+1 
+                      << ": max force = " << maxForce 
+                      << ", total energy = " << totalEnergy 
+                      << ", current time = " << current_time << std::endl;
+        
+            // Check convergence criteria
+            if (maxForce < forceThreshold && fabs(totalEnergy - prevEnergy) < energyThreshold) {
+                converged = true;
+                std::cout << "Pre-relaxation converged after " << i+1 
+                          << " iterations (max force = " << maxForce 
+                          << ", energy change = " << fabs(totalEnergy - prevEnergy) 
+                          << ") at time = " << current_time << std::endl;
+                break;
+            }
+            prevEnergy = totalEnergy;
+        }
+        
+        if (!converged) {
+            std::cerr << "Error: Pre-relaxation did not converge within " << preRelaxSteps 
+                      << " iterations. Total pre-relaxation time = " << current_time << std::endl;
+        } else {
+            std::cout << "Total pre-relaxation time: " << current_time << std::endl;
+        }
+        
+        storage->print_VTK_File();
+        
+        		std::cout<<"LINEAR ENERGY = "<<linearSpringInfoVecs.linear_spring_energy<<std::endl;
+        		std::cout<<"BEND ENERGY = "<<bendingTriangleInfoVecs.bending_triangle_energy<<std::endl;
+        	//	std::cout<<"AREA ENERGY = "<<areaTriangleInfoVecs.area_triangle_energy<<std::endl;
+        //		std::cout<<"VOLUME ENERGY = "<<generalParams.volume_energy<<std::endl;
+        		std::cout<<"true_current_total_volume (before growth and edge swaps) = "<<generalParams.true_current_total_volume<<std::endl;
+        		std::cout<<"current KBT = "<<generalParams.kT<<std::endl;
+        	new_total_energy = prevEnergy;
+            if (std::isnan(new_total_energy)) {
+            std::cout<<"Total Energy is NaN. Exit of (-1) in System.cu main function."<<std::endl;
+            exit(-1);}
+            	
+        			bool end_of_relaxation = false;
+        
+              // Calculate the new total energy of the system.
+              new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
+        			areaTriangleInfoVecs.area_triangle_energy + 
+        			bendingTriangleInfoVecs.bending_triangle_energy;// +0.5*energy_rep;
+              
+              std::cout<<"new_total_energy (is this different from the prev total energy?) = "<< new_total_energy<<std::endl;
+        
+        		  energy_gradient = sqrt((new_total_energy - old_total_energy)*(new_total_energy - old_total_energy))/old_total_energy;
+          		old_total_energy = new_total_energy;
+          		current_time+=generalParams.dt;	
+        
 
-double epsilon_r = 0.0, epsilon_t = 0.0;
-   
-generalParams.epsilon_r = epsilon_r;
-generalParams.epsilon_t = epsilon_t;
-     
-    //apply strain tensor to nodes. nav 03/29/25
-     applyStrainToEdges(
-             generalParams,
-             coordInfoVecs,//need to figure out how to store epsilon_r, epsilon_t, centerX and centerY      
-             linearSpringInfoVecs);
+
+
+  // -------------- EVERSION PHASE: Strain + Relaxation --------------
+    int numStrainSteps = 10;            // configurable number of strain steps
+    int relaxIterationsPerStep = 1000;    // iterations per strain step
+    double strainIncrementRadial = 0.0005;  // 5% radial strain increment per step
+    double strainIncrementTangential = -0.5; // 5% tangential strain increment per step
+
+    for (int step = 0; step < numStrainSteps; step++) {
+        std::cout << "Starting strain step " << step+1 << std::endl;
+        
+        // Update strain parameters (these are applied to the linear springs)
+        generalParams.epsilon_r = strainIncrementRadial;
+        generalParams.epsilon_t = strainIncrementTangential;
+        
+        // Recompute the current center of the mesh
+        double sumX = 0.0, sumY = 0.0, sumZ = 0.0;
+        int nNodes = coordInfoVecs.nodeLocX.size();
+        for (int i = 0; i < nNodes; i++) {
+            sumX += coordInfoVecs.nodeLocX[i];
+            sumY += coordInfoVecs.nodeLocY[i];
+            sumZ += coordInfoVecs.nodeLocZ[i];
+        }
+        generalParams.centerX = sumX / nNodes;
+        generalParams.centerY = sumY / nNodes;
+        generalParams.centerZ = sumZ / nNodes;
+        
+        // Apply the strain update to linear springs.
+        applyStrainToEdges(generalParams, coordInfoVecs, linearSpringInfoVecs);
+        
+        // --- NEW: Update bending parameters ---
+        // For a flat sheet the preferred bending angle is "flat" (e.g. 180° dihedral or 0 difference).
+        // To induce curvature, we choose a nonzero spontaneous curvature.
+        // For example, let’s assume that a spherical cap corresponds to a bending angle difference of, say, 20 degrees.
+        // (Make sure your bending force computation uses bendingTriangleInfoVecs.initial_angle as the target.)
+        double targetBendAngleDeg = 120.0;  // you can tune this value
+        double targetBendAngleRad = targetBendAngleDeg * M_PI / 180.0;
+        bendingTriangleInfoVecs.initial_angle = targetBendAngleRad;
+        // (If your bending module uses a different convention, adjust accordingly.)
+        
+        // Compute bending forces based on the updated bending equilibrium.
+        ComputeCosTriangleSprings(generalParams, coordInfoVecs, bendingTriangleInfoVecs);
+        
+        // Relax the system (both linear and bending forces now contribute)
+        for (int iter = 0; iter < relaxIterationsPerStep; iter++) {
+            Solve_Forces();
+            bendingTriangleInfoVecs.initial_angle = targetBendAngleRad;
+           // std::cout<<"bending angle = "<< bendingTriangleInfoVecs.initial_angle<< std::endl;
+        
+            AdvancePositions(coordInfoVecs, generalParams, domainParams);
+        }
+        std::cout << "Strain step " << step+1 << " relaxation complete." << std::endl;
+        storage->print_VTK_File(); // output state after this strain step
+    }
+
+    std::cout << "Eversion simulation complete." << std::endl;
+    	std::cout<<"LINEAR ENERGY = "<<linearSpringInfoVecs.linear_spring_energy<<std::endl;
+        		std::cout<<"BEND ENERGY = "<<bendingTriangleInfoVecs.bending_triangle_energy<<std::endl;
+        	//	std::cout<<"AREA ENERGY = "<<areaTriangleInfoVecs.area_triangle_energy<<std::endl;
+        //		std::cout<<"VOLUME ENERGY = "<<generalParams.volume_energy<<std::endl;
+        		std::cout<<"true_current_total_volume (before growth and edge swaps) = "<<generalParams.true_current_total_volume<<std::endl;
+        		std::cout<<"current KBT = "<<generalParams.kT<<std::endl;
+}
+
+
+//// Optional: initial relaxation to steady state
+//Solve_Forces();
+//for (int iter = 0; iter < 5e5; ++iter) {
+//    // Update node positions: x_new = x_old + dt * F (if not fixed)
+//
+//     AdvancePositions(
+//            coordInfoVecs,
+//            generalParams,
+//            domainParams);
+//            new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
+//                areaTriangleInfoVecs.area_triangle_energy + 
+//                bendingTriangleInfoVecs.bending_triangle_energy;// + 0.5*energy_rep; // Add other energy contributions if needed.
+//                
+//                
+//        old_total_energy = new_total_energy;
+//        current_time+=generalParams.dt;
+// 
+// Solve_Forces();
+////    thrust::for_each(
+////        thrust::make_zip_iterator(thrust::make_tuple(coordInfoVecs.nodeForceX.begin(),
+////                                                     coordInfoVecs.nodeForceY.begin(),
+////                                                     coordInfoVecs.nodeForceZ.begin(),
+////                                                     coordInfoVecs.nodeLocX.begin(),
+////                                                     coordInfoVecs.nodeLocY.begin(),
+////                                                     coordInfoVecs.nodeLocZ.begin(),
+////                                                     coordInfoVecs.isNodeFixed.begin())),
+////        thrust::make_zip_iterator(thrust::make_tuple(coordInfoVecs.nodeForceX.end(),
+////                                                     coordInfoVecs.nodeForceY.end(),
+////                                                     coordInfoVecs.nodeForceZ.end(),
+////                                                     coordInfoVecs.nodeLocX.end(),
+////                                                     coordInfoVecs.nodeLocY.end(),
+////                                                     coordInfoVecs.nodeLocZ.end(),
+////                                                     coordInfoVecs.isNodeFixed.end())),
+////        [=] __device__ (const thrust::tuple<double&, double&, double&, double&, double&, double&, bool&> t) {
+////            double Fx = thrust::get<0>(t);
+////            double Fy = thrust::get<1>(t);
+////            double Fz = thrust::get<2>(t);
+////            double& x  = thrust::get<3>(t);
+////            double& y  = thrust::get<4>(t);
+////            double& z  = thrust::get<5>(t);
+////            bool   fixed = thrust::get<6>(t);
+////            if (!fixed) {
+////                // Move free nodes along force direction
+////                x += GeneralParams.dt * Fx;
+////                y += GeneralParams.dt * Fy;
+////                z += GeneralParams.dt * Fz;
+////            }
+////        }
+////    );
+////    // Recompute forces for next iteration
+////    Solve_Forces();
+//    // (Optional) check max force to break early if below tolerance
+//
+//      // Calculate the total energy of the system.
+//        
+//    }
+//   storage->print_VTK_File();
+//   new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
+//                areaTriangleInfoVecs.area_triangle_energy + 
+//                bendingTriangleInfoVecs.bending_triangle_energy;// + 0.5*energy_rep; // Add other energy contributions if needed.
+//       std::cout<<"Initial relaxation complete"<<std::endl;         
+//                
+//  	// Print simulation results for "steady state" initial condition before growth and edge swaps.
+//  	std::cout<<"current total energy (before growth and edge swaps) = "<<new_total_energy<<std::endl;
+//		std::cout<<"LINEAR ENERGY = "<<linearSpringInfoVecs.linear_spring_energy<<std::endl;
+//		std::cout<<"BEND ENERGY = "<<bendingTriangleInfoVecs.bending_triangle_energy<<std::endl;
+//		std::cout<<"AREA ENERGY = "<<areaTriangleInfoVecs.area_triangle_energy<<std::endl;
+//		std::cout<<"VOLUME ENERGY = "<<generalParams.volume_energy<<std::endl;
+//	
+//   
+////   // Check if it's time for growth and if growth attempts are within limit (figure out how to check for this)
+////     double centerX = 0.0, centerY = 0.0;
+////     int numNodes = coordInfoVecs.nodeLocX.size();
+////     for (int i = 0; i < numNodes; i++) {
+////         centerX += coordInfoVecs.nodeLocX[i];
+////         centerY += coordInfoVecs.nodeLocY[i];
+////     } 
+////    centerX /= numNodes;
+////    centerY /= numNodes;
+////  std::cout<< "new center = ("<<centerX<<", "<<centerY<<") "<<std::endl;
+//
+//double epsilon_r = 0.0005, epsilon_t = 0.0;
+//   
+//generalParams.epsilon_r = epsilon_r;
+//generalParams.epsilon_t = epsilon_t;
+//   
+//   int strain_steps = 30;
+//    
+// for (int step = 0; step<strain_steps; ++step){   
+//     
+//    //apply strain tensor to nodes. nav 03/29/25
+//     applyStrainToEdges(
+//             generalParams,
+//             coordInfoVecs,//need to figure out how to store epsilon_r, epsilon_t, centerX and centerY      
+//             linearSpringInfoVecs);
+//  int maxIter = 3e3;           
+//  double tol = 1e-6;      // force convergence tolerance
+//double stepSize = 0.1;  // small factor for movement, adjust as needed for stability
+//for (int iter = 0; iter < maxIter; ++iter) {
+//    Solve_Forces();  // update coordInfoVecs.nodeForceX/Y/Z based on current positions and rest lengths
+//    // Check convergence: maximum force magnitude
+//    double maxForce = 0.0;
+//    for (int i = 0; i < generalParams.maxNodeCount; ++i) {
+//        double fxi = coordInfoVecs.nodeForceX[i], fyi = coordInfoVecs.nodeForceY[i], fzi = coordInfoVecs.nodeForceZ[i];
+//        double fmag = sqrt(fxi*fxi + fyi*fyi + fzi*fzi);
+//        if (fmag > maxForce) maxForce = fmag;
+//    }
+//    if (maxForce < tol) break;  // forces are effectively zero -> equilibrium
+//    // Move nodes a bit along force direction
+////    for (int i = 0; i < generalParams.maxNodeCount; ++i) {
+////        if (!coordInfoVecs.isNodeFixed[i]) {  // don't move fixed boundary nodes, if any
+////            coordInfoVecs.nodeLocX[i] += stepSize * coordInfoVecs.nodeForceX[i];
+////            coordInfoVecs.nodeLocY[i] += stepSize * coordInfoVecs.nodeForceY[i];
+////            coordInfoVecs.nodeLocZ[i] += stepSize * coordInfoVecs.nodeForceZ[i];
+////        }
+////        
+////    }
+//AdvancePositions(
+//            coordInfoVecs,
+//            generalParams,
+//            domainParams);
+//           
+//                
+//    
+//}
+////  std::cout<<"Forces after step "<< step<< " = "<< fmag<<std::endl;
+//		// Print VTK file for visualization.
+//       new_total_energy = linearSpringInfoVecs.linear_spring_energy + 
+//                areaTriangleInfoVecs.area_triangle_energy + 
+//                bendingTriangleInfoVecs.bending_triangle_energy;// + 0.5*energy_rep; // Add other energy contributions if needed.
+//       
+//                
+//  	// Print simulation results for "steady state" initial condition before growth and edge swaps.
+//  	std::cout<<"current total energy (before growth and edge swaps) at step "<< step<< " = " <<new_total_energy<<std::endl;
+//		std::cout<<"LINEAR ENERGY at step "<< step<< " = "<<linearSpringInfoVecs.linear_spring_energy<<std::endl;
+//		std::cout<<"BEND ENERGY at step "<< step<< " = "<<bendingTriangleInfoVecs.bending_triangle_energy<<std::endl;
+//		std::cout<<"AREA ENERGY at step "<< step<< " = "<<areaTriangleInfoVecs.area_triangle_energy<<std::endl;
+//		std::cout<<"VOLUME ENERGY at step "<< step<< " = "<<generalParams.volume_energy<<std::endl;
+//	
+//    storage->print_VTK_File();
+//}
+//             
+             
+             
 
 
 //thrust::copy(hostSetInfoVecs.edge_initial_length.begin(),
@@ -2027,7 +2343,7 @@ generalParams.epsilon_t = epsilon_t;
 //			}
 //			
 //
-			std::random_device rand_dev;
+		//	std::random_device rand_dev;
 //			std::mt19937 generator3(rand_dev());
 //			std::shuffle(std::begin(VectorShuffleForGrowthLoop), std::end(VectorShuffleForGrowthLoop), generator3);
 //			int MAX_GROWTH_TEST = VectorShuffleForGrowthLoop.size();
@@ -2035,7 +2351,7 @@ generalParams.epsilon_t = epsilon_t;
 //			int true_DELTA = 0;
 //			int suitableForGrowthCounter = 0;
 //
-			utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
+	//		utilities_ptr->transferDtoH(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
 //			int GROWTH_COUNT = 0;
 //
 //
@@ -2106,7 +2422,7 @@ generalParams.epsilon_t = epsilon_t;
 
 //			// Update total growth attempt counter and transfer data back to the device.
 //      TOTAL_GROWTH_ATTEMPT += 1;
-			utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
+//			utilities_ptr->transferHtoD(generalParams, coordInfoVecs, build_ptr->hostSetInfoVecs);
 //			
 //      // Print growth-related statistics
 //      std::cout<<"END GROWTH ALGORITHM"<<std::endl;
@@ -2117,10 +2433,9 @@ generalParams.epsilon_t = epsilon_t;
 //      
 //				std::cout<<"Exiting growth algorithm"<<std::endl;
 //			}	// End of growth algorithm.
-		} // End of iteration loop through time steps.
-	} // End of main loop through relaxation and growth events.
-};
+//		} // End of iteration loop through time steps.
 	
+	//This is where the main simulation loop from yeast budding would end. Nav moved it earlier. 
 	
 // Part 16	
 
@@ -2372,6 +2687,10 @@ std::cout<<"size of device fixed "<< coordInfoVecs.isNodeFixed.size()<<std::endl
 	
 	// Clear edge_initial_length vector for linear springs.
   linearSpringInfoVecs.edge_initial_length.clear();
+  linearSpringInfoVecs.edge_rest_length.resize(hostSetInfoVecs.edge_rest_length.size());
+  std::cout << "host edge_initial_length size 1 = " << hostSetInfoVecs.edge_initial_length.size() << std::endl;
+std::cout << "device edge_initial_length size 1 = " << linearSpringInfoVecs.edge_initial_length.size() << std::endl;
+
   
   for (int e = 0; e < coordInfoVecs.num_edges; ++e) {
     int i = coordInfoVecs.edges2Nodes_1[e];
@@ -2380,11 +2699,24 @@ std::cout<<"size of device fixed "<< coordInfoVecs.isNodeFixed.size()<<std::endl
     double dy = hostSetInfoVecs.nodeLocY[j] - hostSetInfoVecs.nodeLocY[i];
     double dz = hostSetInfoVecs.nodeLocZ[j] - hostSetInfoVecs.nodeLocZ[i];
     double dist = sqrt(dx*dx + dy*dy + dz*dz);
-    hostSetInfoVecs.edge_initial_length.push_back(dist);    // already done for initial
+    //hostSetInfoVecs.edge_initial_length.push_back(dist);    // already done for initial
+    hostSetInfoVecs.edge_rest_length.push_back(dist);
     //std::cout<< "edge_rest_length = " << hostSetInfoVecs.edge_initial_length[i]<<std::endl; in the current data structure it gave me 1021 edges. That's good. Now that they have been initialized I should start changing the rest lengths. 
     }
-// Copy to device
+  
+//thrust::copy(linearSpringInfoVecs.edge_rest_length.begin(),
+//             linearSpringInfoVecs.edge_rest_length.end(),
+//             hostSetInfoVecs.edge_rest_length.begin());
+linearSpringInfoVecs.edge_rest_length = hostSetInfoVecs.edge_rest_length;
+std::cout << "host edge_rest_length size = " << hostSetInfoVecs.edge_rest_length.size() << std::endl;
+std::cout << "device edge_rest_length size = " << linearSpringInfoVecs.edge_rest_length.size() << std::endl;
+
 linearSpringInfoVecs.edge_initial_length = hostSetInfoVecs.edge_initial_length;
+// Copy to device
+std::cout << "host edge_initial_length size = " << hostSetInfoVecs.edge_initial_length.size() << std::endl;
+std::cout << "device edge_initial_length size = " << linearSpringInfoVecs.edge_initial_length.size() << std::endl;
+
+
 	
 	//Resize the hostSetInfoVecs for data transfer between host and device.
 	hostSetInfoVecs.isNodeFixed.resize(mem_prealloc*hostSetInfoVecs.nodeLocX.size());

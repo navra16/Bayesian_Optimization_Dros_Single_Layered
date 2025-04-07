@@ -24,6 +24,17 @@
 #include <thrust/pair.h>
 #include <stdint.h>
 
+struct ForceMagnitude {
+    __host__ __device__
+    double operator()(const thrust::tuple<double, double, double>& t) const {
+        double fx = thrust::get<0>(t);
+        double fy = thrust::get<1>(t);
+        double fz = thrust::get<2>(t);
+        return sqrt(fx * fx + fy * fy + fz * fz);
+    }
+};
+
+
 
 // Struct to store information related to the capsid (virus shell) nodes.
 struct CapsidInfoVecs {
@@ -404,7 +415,12 @@ struct GeneralParams{
 	double centerX = 0.0;
 	double centerY = 0.0;
 	double centerZ = 0.0;
-
+  
+  double epsilon_r_center;  // Radial strain at the disc center (e.g., +0.2).
+    double epsilon_r_edge;    // Radial strain at the disc boundary (e.g., -0.1).
+    double epsilon_t;         // Uniform tangential strain (e.g., -0.05).
+    double disc_radius;
+    
 	double current_total_volume;
 	double true_current_total_volume;
 	double eq_total_volume;
@@ -436,7 +452,7 @@ struct GeneralParams{
  
  // Strain Tensor values
  double epsilon_r;
- double epsilon_t;
+// double epsilon_t;
 
 };
 

@@ -7,8 +7,7 @@
 void ComputeLinearSprings(
     GeneralParams& generalParams,
     CoordInfoVecs& coordInfoVecs,
-    LinearSpringInfoVecs& linearSpringInfoVecs,
-    LJInfoVecs& ljInfoVecs);
+    LinearSpringInfoVecs& linearSpringInfoVecs);
 
 // Define a functor for calculating linear spring forces for each edge.
 struct LinearSpringFunctor {
@@ -139,6 +138,7 @@ struct LinearSpringFunctor {
             double zLoc_LR = locZAddr[edgeL] - locZAddr[edgeR];
             double length_current = sqrt(xLoc_LR*xLoc_LR + yLoc_LR*yLoc_LR + zLoc_LR*zLoc_LR);
             double energy = 0.0;
+            //edge_rest_length[counter] = length_current;
             // Here, instead of using the single global rest length "length_zero", we use the per-spring value:
             double restLen = edge_rest_length[counter];
 

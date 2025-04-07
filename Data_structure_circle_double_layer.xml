@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data>
    <settings>
-      <Tau>0.0</Tau>
+      <Tau>425.0</Tau>
       <Tau>1.0</Tau>
       <KBT>1.0</KBT>
       <Linear_Const>5.0</Linear_Const>
